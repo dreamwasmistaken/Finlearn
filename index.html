@@ -1,125 +1,965 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Alex Ventures</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MoneyMoves — Financial Education for Gen Z</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #1a1a26;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0f0f8;
+    --muted: #7a7a9a;
+    --lime: #c9f135;
+    --teal: #00e5c3;
+    --orange: #ff6b35;
+    --purple: #9b5de5;
+    --pink: #f72585;
+    --yellow: #ffd60a;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    font-size: 16px;
+    line-height: 1.6;
+  }
 
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: Arial, sans-serif;
-    }
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 5%;
+    background: rgba(10,10,15,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--border);
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-weight: 800; font-size: 1.4rem;
+    background: linear-gradient(135deg, var(--lime), var(--teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    text-decoration: none;
+  }
+  .nav-links { display: flex; gap: 32px; list-style: none; }
+  .nav-links a {
+    color: var(--muted); text-decoration: none;
+    font-size: 0.9rem; font-weight: 500; letter-spacing: 0.02em;
+    transition: color 0.2s;
+  }
+  .nav-links a:hover { color: var(--text); }
+  .nav-cta {
+    background: var(--lime); color: #0a0a0f;
+    border: none; padding: 10px 22px;
+    border-radius: 50px; font-weight: 700;
+    font-family: var(--font-display); font-size: 0.85rem;
+    cursor: pointer; text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(201,241,53,0.35); }
 
-    body {
-      background: #0a0a0a;
-      color: white;
-    }
+  /* HERO */
+  .hero {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center; padding: 120px 5% 80px;
+    position: relative; overflow: hidden;
+  }
+  .hero-bg {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(ellipse 60% 50% at 20% 30%, rgba(0,229,195,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 60% at 80% 70%, rgba(201,241,53,0.1) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 50% 50%, rgba(155,93,229,0.06) 0%, transparent 70%);
+  }
+  .hero-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 50px; padding: 8px 18px; font-size: 0.8rem;
+    color: var(--teal); font-weight: 500; letter-spacing: 0.05em;
+    text-transform: uppercase; margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+  .hero-tag span { width: 6px; height: 6px; background: var(--teal); border-radius: 50%; display: inline-block; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:0.5; transform:scale(1.5); } }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(3rem, 8vw, 7rem);
+    font-weight: 800; line-height: 1.0;
+    letter-spacing: -0.03em;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+  h1 .accent-lime { color: var(--lime); }
+  h1 .accent-teal { color: var(--teal); }
+  .hero-sub {
+    max-width: 600px; margin: 24px auto 0;
+    font-size: 1.15rem; color: var(--muted); font-weight: 300;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+  .hero-btns {
+    display: flex; gap: 16px; margin-top: 40px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+  .btn-primary {
+    background: var(--lime); color: #0a0a0f;
+    border: none; padding: 16px 36px; border-radius: 50px;
+    font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+    cursor: pointer; text-decoration: none;
+    transition: transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(201,241,53,0.4); }
+  .btn-ghost {
+    background: transparent; color: var(--text);
+    border: 1px solid var(--border); padding: 16px 36px; border-radius: 50px;
+    font-family: var(--font-display); font-weight: 600; font-size: 1rem;
+    cursor: pointer; text-decoration: none;
+    transition: border-color 0.2s, background 0.2s;
+    display: inline-block;
+  }
+  .btn-ghost:hover { border-color: var(--teal); background: rgba(0,229,195,0.06); }
+  .hero-stats {
+    display: flex; gap: 48px; margin-top: 72px; flex-wrap: wrap; justify-content: center;
+    animation: fadeUp 0.7s 0.4s ease both;
+  }
+  .stat { text-align: center; }
+  .stat-num {
+    font-family: var(--font-display); font-size: 2.2rem; font-weight: 800;
+    background: linear-gradient(135deg, var(--lime), var(--teal));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .stat-label { font-size: 0.8rem; color: var(--muted); font-weight: 400; margin-top: 4px; }
+  @keyframes fadeUp { from { opacity:0; transform: translateY(24px); } to { opacity:1; transform: translateY(0); } }
 
-    header {
-      display: flex;
-      justify-content: space-between;
-      padding: 20px 50px;
-      background: rgba(0,0,0,0.8);
-      position: fixed;
-      width: 100%;
-    }
+  /* SECTION STYLES */
+  section { padding: 100px 5%; }
+  .section-tag {
+    font-size: 0.75rem; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--teal); margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3.2rem);
+    font-weight: 800; letter-spacing: -0.02em; line-height: 1.1;
+  }
+  .section-sub { color: var(--muted); max-width: 560px; margin-top: 14px; font-weight: 300; font-size: 1.05rem; }
 
-    header h1 {
-      color: #00f0ff;
-    }
+  /* MODULES */
+  .modules-grid {
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px; margin-top: 56px;
+  }
+  .module-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 32px;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    cursor: pointer; position: relative; overflow: hidden;
+  }
+  .module-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--card-accent, var(--lime));
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.3s;
+  }
+  .module-card:hover { transform: translateY(-6px); border-color: rgba(255,255,255,0.15); box-shadow: 0 20px 60px rgba(0,0,0,0.4); }
+  .module-card:hover::before { transform: scaleX(1); }
+  .module-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.5rem; margin-bottom: 20px;
+    background: var(--icon-bg, rgba(201,241,53,0.12));
+  }
+  .module-card h3 {
+    font-family: var(--font-display); font-size: 1.2rem; font-weight: 700;
+    margin-bottom: 10px;
+  }
+  .module-card p { color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
+  .module-tag {
+    display: inline-block; margin-top: 18px; padding: 5px 14px;
+    border-radius: 50px; font-size: 0.72rem; font-weight: 600;
+    letter-spacing: 0.05em; text-transform: uppercase;
+    background: var(--tag-bg, rgba(201,241,53,0.1));
+    color: var(--tag-color, var(--lime));
+  }
 
-    nav a {
-      margin-left: 20px;
-      color: white;
-      text-decoration: none;
-    }
+  /* LEARN SECTIONS - TABBED */
+  .learn-section { background: var(--surface); border-radius: 28px; padding: 48px; margin-top: 56px; }
+  .tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 40px; }
+  .tab {
+    padding: 10px 22px; border-radius: 50px; border: 1px solid var(--border);
+    background: transparent; color: var(--muted); font-family: var(--font-body);
+    font-size: 0.88rem; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .tab.active { background: var(--lime); border-color: var(--lime); color: #0a0a0f; font-weight: 700; }
+  .tab:not(.active):hover { border-color: rgba(255,255,255,0.2); color: var(--text); }
+  .tab-content { display: none; }
+  .tab-content.active { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+  .learn-text h3 {
+    font-family: var(--font-display); font-size: 1.8rem; font-weight: 800;
+    line-height: 1.2; margin-bottom: 16px;
+  }
+  .learn-text p { color: var(--muted); line-height: 1.7; margin-bottom: 14px; font-size: 0.97rem; }
+  .learn-steps { display: flex; flex-direction: column; gap: 14px; margin-top: 24px; }
+  .step {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--surface2); padding: 18px; border-radius: 14px;
+    border: 1px solid var(--border);
+  }
+  .step-num {
+    width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 800; font-size: 0.85rem; flex-shrink: 0;
+    background: var(--lime); color: #0a0a0f;
+  }
+  .step-text { flex: 1; }
+  .step-text strong { font-weight: 600; display: block; margin-bottom: 4px; font-size: 0.95rem; }
+  .step-text span { color: var(--muted); font-size: 0.88rem; }
+  .tip-box {
+    background: var(--surface2); border: 1px solid rgba(0,229,195,0.2);
+    border-radius: 16px; padding: 24px;
+  }
+  .tip-box .tip-label { color: var(--teal); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 12px; }
+  .tip-item { display: flex; gap: 12px; margin-bottom: 14px; align-items: flex-start; font-size: 0.9rem; }
+  .tip-item:last-child { margin-bottom: 0; }
+  .tip-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--teal); margin-top: 6px; flex-shrink: 0; }
+  .tip-item span { color: var(--muted); line-height: 1.5; }
+  .tip-item strong { color: var(--text); }
 
-    .hero {
-      height: 100vh;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      flex-direction: column;
-      text-align: center;
-    }
+  /* STOCKS TRACKER */
+  .stocks-demo {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; margin-top: 56px;
+  }
+  .stocks-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px; }
+  .stocks-header h3 { font-family: var(--font-display); font-size: 1.3rem; font-weight: 700; }
+  .live-badge {
+    display: flex; align-items: center; gap: 7px;
+    background: rgba(201,241,53,0.1); border: 1px solid rgba(201,241,53,0.2);
+    padding: 6px 14px; border-radius: 50px; font-size: 0.75rem; font-weight: 600; color: var(--lime);
+  }
+  .live-dot { width: 6px; height: 6px; background: var(--lime); border-radius: 50%; animation: pulse 1.5s infinite; }
+  .stocks-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+  .stock-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 18px;
+    transition: border-color 0.2s;
+  }
+  .stock-card:hover { border-color: rgba(255,255,255,0.2); }
+  .stock-ticker { font-family: var(--font-display); font-size: 1rem; font-weight: 800; letter-spacing: 0.05em; }
+  .stock-name { font-size: 0.78rem; color: var(--muted); margin: 3px 0 10px; }
+  .stock-price { font-size: 1.4rem; font-weight: 600; }
+  .stock-change { font-size: 0.82rem; font-weight: 600; margin-top: 4px; }
+  .pos { color: #22c55e; }
+  .neg { color: #ef4444; }
+  .mini-chart { height: 40px; margin-top: 12px; }
+  .mini-chart svg { width: 100%; height: 100%; }
 
-    .hero h2 {
-      font-size: 50px;
-      margin-bottom: 20px;
-    }
+  /* BUSINESS SECTION */
+  .biz-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; margin-top: 56px; }
+  .biz-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 28px; position: relative; overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  .biz-card:hover { transform: translateY(-5px); box-shadow: 0 16px 48px rgba(0,0,0,0.35); }
+  .biz-num {
+    font-family: var(--font-display); font-size: 3.5rem; font-weight: 800;
+    opacity: 0.07; position: absolute; top: 12px; right: 20px; line-height: 1;
+  }
+  .biz-icon { font-size: 1.8rem; margin-bottom: 16px; }
+  .biz-card h4 { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+  .biz-card p { color: var(--muted); font-size: 0.88rem; line-height: 1.6; }
+  .biz-ideas { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px; }
+  .idea-tag {
+    padding: 4px 12px; border-radius: 50px; font-size: 0.73rem; font-weight: 600;
+    background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+  }
 
-    .hero button {
-      padding: 12px 25px;
-      border: none;
-      background: #00f0ff;
-      color: black;
-      cursor: pointer;
-      font-size: 16px;
-    }
+  /* QUIZ */
+  .quiz-section { background: var(--surface); border-radius: 28px; padding: 48px; margin-top: 56px; }
+  .quiz-intro { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 20px; }
+  .quiz-intro h3 { font-family: var(--font-display); font-size: 1.5rem; font-weight: 800; }
+  .score-badge {
+    background: var(--surface2); border: 1px solid var(--border);
+    padding: 10px 22px; border-radius: 50px; font-family: var(--font-display); font-size: 0.9rem;
+  }
+  .score-badge span { color: var(--lime); font-weight: 800; }
+  .question-box { margin-bottom: 24px; }
+  .question-text { font-size: 1.05rem; font-weight: 500; margin-bottom: 18px; line-height: 1.5; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 14px 20px; cursor: pointer;
+    font-size: 0.93rem; color: var(--muted);
+    transition: all 0.2s; text-align: left;
+  }
+  .option:hover { border-color: rgba(201,241,53,0.4); color: var(--text); background: rgba(201,241,53,0.05); }
+  .option.correct { border-color: #22c55e; background: rgba(34,197,94,0.1); color: #22c55e; }
+  .option.wrong { border-color: #ef4444; background: rgba(239,68,68,0.1); color: #ef4444; }
+  .feedback { margin-top: 14px; padding: 14px 18px; border-radius: 12px; font-size: 0.9rem; display: none; }
+  .feedback.show { display: block; }
+  .feedback.good { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: #4ade80; }
+  .feedback.bad { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25); color: #f87171; }
+  .quiz-nav { display: flex; gap: 12px; margin-top: 24px; }
+  #nextBtn {
+    background: var(--lime); color: #0a0a0f; border: none;
+    padding: 12px 28px; border-radius: 50px; font-family: var(--font-display);
+    font-weight: 700; font-size: 0.9rem; cursor: pointer;
+    transition: transform 0.2s; display: none;
+  }
+  #nextBtn:hover { transform: translateY(-2px); }
+  .progress-bar { height: 4px; background: var(--surface2); border-radius: 4px; margin-bottom: 28px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--lime), var(--teal)); border-radius: 4px; transition: width 0.4s; }
 
-    .section {
-      padding: 100px 50px;
-      text-align: center;
-    }
+  /* RESOURCES */
+  .resources-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-top: 56px; }
+  .resource-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 18px; padding: 26px;
+    display: flex; gap: 18px; align-items: flex-start;
+    transition: transform 0.3s, border-color 0.3s; cursor: pointer;
+    text-decoration: none; color: inherit;
+  }
+  .resource-card:hover { transform: translateY(-4px); border-color: rgba(255,255,255,0.15); }
+  .resource-icon {
+    width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 1.3rem;
+  }
+  .resource-card h4 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 6px; }
+  .resource-card p { color: var(--muted); font-size: 0.85rem; line-height: 1.5; }
+  .resource-type { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-top: 12px; }
 
-    .services {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-      margin-top: 40px;
-    }
+  /* CTA */
+  .cta-section {
+    margin: 0 5% 80px; border-radius: 28px;
+    background: linear-gradient(135deg, var(--surface2) 0%, rgba(0,229,195,0.08) 50%, rgba(201,241,53,0.08) 100%);
+    border: 1px solid var(--border); padding: 72px 48px;
+    text-align: center; position: relative; overflow: hidden;
+  }
+  .cta-section::before {
+    content: ''; position: absolute;
+    width: 300px; height: 300px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,241,53,0.12), transparent);
+    top: -100px; right: -100px;
+  }
+  .cta-section h2 {
+    font-family: var(--font-display); font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 800; letter-spacing: -0.02em; margin-bottom: 16px;
+  }
+  .cta-section p { color: var(--muted); max-width: 500px; margin: 0 auto 36px; font-size: 1.05rem; }
 
-    .card {
-      background: #111;
-      padding: 20px;
-      border-radius: 10px;
-    }
+  /* FOOTER */
+  footer {
+    border-top: 1px solid var(--border); padding: 40px 5%;
+    display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;
+  }
+  footer p { color: var(--muted); font-size: 0.85rem; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { color: var(--muted); font-size: 0.85rem; text-decoration: none; transition: color 0.2s; }
+  .footer-links a:hover { color: var(--text); }
 
-    footer {
-      padding: 30px;
-      text-align: center;
-      background: #000;
-    }
-  </style>
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 3px; }
+
+  /* MOBILE */
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .tab-content.active { grid-template-columns: 1fr; }
+    .learn-section, .quiz-section { padding: 28px 20px; }
+    .hero-stats { gap: 28px; }
+    .cta-section { padding: 48px 24px; }
+  }
+
+  /* GLOSSARY */
+  .glossary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-top: 56px; }
+  .glossary-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 14px; padding: 20px;
+    cursor: pointer; transition: border-color 0.2s;
+  }
+  .glossary-item:hover { border-color: rgba(255,255,255,0.15); }
+  .glossary-term { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--lime); margin-bottom: 6px; }
+  .glossary-def { color: var(--muted); font-size: 0.88rem; line-height: 1.5; }
+  .glossary-cat { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 10px; color: var(--teal); }
+
+  /* smooth in */
+  .fade-in { opacity: 0; transform: translateY(20px); transition: opacity 0.6s, transform 0.6s; }
+  .fade-in.visible { opacity: 1; transform: none; }
+</style>
 </head>
-
 <body>
 
-<header>
-  <h1>Alex Ventures</h1>
-  <nav>
-    <a href="#">Home</a>
-    <a href="#">Services</a>
-    <a href="#">Contact</a>
-  </nav>
-</header>
+<nav>
+  <a href="#" class="logo">MoneyMoves 💸</a>
+  <ul class="nav-links">
+    <li><a href="#learn">Learn</a></li>
+    <li><a href="#stocks">Stocks</a></li>
+    <li><a href="#business">Business</a></li>
+    <li><a href="#quiz">Quiz</a></li>
+    <li><a href="#glossary">Glossary</a></li>
+  </ul>
+  <a href="#quiz" class="nav-cta">Test Yourself</a>
+</nav>
 
+<!-- HERO -->
 <section class="hero">
-  <h2>We Help Businesses Grow 🚀</h2>
-  <p>Marketing. Websites. Revenue.</p>
-  <button>Get Started</button>
-</section>
-
-<section class="section">
-  <h2>Our Services</h2>
-  <div class="services">
-    <div class="card">Marketing Strategy</div>
-    <div class="card">Website Development</div>
-    <div class="card">Business Growth</div>
+  <div class="hero-bg"></div>
+  <div class="hero-tag"><span></span> Financial Education for the Next Generation</div>
+  <h1>Your Money.<br><span class="accent-lime">Your Future.</span><br><span class="accent-teal">Your Rules.</span></h1>
+  <p class="hero-sub">Learn stocks, build businesses, and master money — everything they don't teach you in school, explained for teens and young adults.</p>
+  <div class="hero-btns">
+    <a href="#learn" class="btn-primary">Start Learning →</a>
+    <a href="#quiz" class="btn-ghost">Take the Quiz</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat"><div class="stat-num">6</div><div class="stat-label">Core Modules</div></div>
+    <div class="stat"><div class="stat-num">50+</div><div class="stat-label">Key Concepts</div></div>
+    <div class="stat"><div class="stat-num">100%</div><div class="stat-label">Free to Learn</div></div>
+    <div class="stat"><div class="stat-num">∞</div><div class="stat-label">Earning Potential</div></div>
   </div>
 </section>
 
-<section class="section">
-  <h2>Contact</h2>
-  <p>Email: your@email.com</p>
+<!-- MODULES -->
+<section id="learn" style="padding-top: 60px;">
+  <div class="section-tag">What You'll Master</div>
+  <h2 class="section-title">Everything about<br>money that matters</h2>
+  <p class="section-sub">From your first dollar to your first million — cover every pillar of financial intelligence.</p>
+  <div class="modules-grid">
+    <div class="module-card" style="--card-accent: var(--lime); --icon-bg: rgba(201,241,53,0.12); --tag-bg: rgba(201,241,53,0.08); --tag-color: var(--lime);" onclick="document.querySelector('[data-tab=budgeting]').click(); document.querySelector('.learn-section').scrollIntoView({behavior:'smooth'})">
+      <div class="module-icon">💰</div>
+      <h3>Budgeting & Saving</h3>
+      <p>Learn how to track your income, build an emergency fund, and make your money work harder from day one.</p>
+      <span class="module-tag">Foundation</span>
+    </div>
+    <div class="module-card" style="--card-accent: var(--teal); --icon-bg: rgba(0,229,195,0.12); --tag-bg: rgba(0,229,195,0.08); --tag-color: var(--teal);" onclick="document.querySelector('[data-tab=investing]').click(); document.querySelector('.learn-section').scrollIntoView({behavior:'smooth'})">
+      <div class="module-icon">📈</div>
+      <h3>Investing Basics</h3>
+      <p>Understand index funds, ETFs, and compound interest — the secret weapons that build long-term wealth.</p>
+      <span class="module-tag">Wealth Building</span>
+    </div>
+    <div class="module-card" style="--card-accent: var(--orange); --icon-bg: rgba(255,107,53,0.12); --tag-bg: rgba(255,107,53,0.08); --tag-color: var(--orange);" onclick="document.querySelector('[data-tab=stocks]').click(); document.querySelector('.learn-section').scrollIntoView({behavior:'smooth'})">
+      <div class="module-icon">🏦</div>
+      <h3>Stock Market</h3>
+      <p>Decode the stock market — learn how shares work, how to read charts, and build your first portfolio.</p>
+      <span class="module-tag">Advanced</span>
+    </div>
+    <div class="module-card" style="--card-accent: var(--purple); --icon-bg: rgba(155,93,229,0.12); --tag-bg: rgba(155,93,229,0.08); --tag-color: var(--purple);" onclick="document.querySelector('[data-tab=business]').click(); document.querySelector('.learn-section').scrollIntoView({behavior:'smooth'})">
+      <div class="module-icon">🚀</div>
+      <h3>Starting a Business</h3>
+      <p>From idea to launch — how to validate, brand, market, and scale a business with little to no money.</p>
+      <span class="module-tag">Entrepreneurship</span>
+    </div>
+    <div class="module-card" style="--card-accent: var(--pink); --icon-bg: rgba(247,37,133,0.12); --tag-bg: rgba(247,37,133,0.08); --tag-color: var(--pink);">
+      <div class="module-icon">💳</div>
+      <h3>Credit & Debt</h3>
+      <p>Understand credit scores, how debt works, and how to use credit as a tool — not a trap.</p>
+      <span class="module-tag">Life Skills</span>
+    </div>
+    <div class="module-card" style="--card-accent: var(--yellow); --icon-bg: rgba(255,214,10,0.12); --tag-bg: rgba(255,214,10,0.08); --tag-color: var(--yellow);">
+      <div class="module-icon">🧾</div>
+      <h3>Taxes & Income</h3>
+      <p>Learn what taxes actually are, how to file them, and how smart people legally minimize what they pay.</p>
+      <span class="module-tag">Adulting</span>
+    </div>
+  </div>
 </section>
 
+<!-- TABBED LEARN -->
+<section style="padding-top: 0;">
+  <div class="learn-section fade-in">
+    <div class="tabs">
+      <button class="tab active" data-tab="budgeting" onclick="switchTab('budgeting')">💰 Budgeting</button>
+      <button class="tab" data-tab="investing" onclick="switchTab('investing')">📈 Investing</button>
+      <button class="tab" data-tab="stocks" onclick="switchTab('stocks')">🏦 Stocks</button>
+      <button class="tab" data-tab="business" onclick="switchTab('business')">🚀 Business</button>
+    </div>
+
+    <!-- BUDGETING -->
+    <div class="tab-content active" id="tab-budgeting">
+      <div class="learn-text">
+        <h3>The 50/30/20 Rule That Changes Everything</h3>
+        <p>Before you can grow money, you need to understand where it goes. Most teenagers and young adults spend without a plan — and wonder why they're always broke.</p>
+        <p>The 50/30/20 rule is the simplest way to take control: split your income into needs, wants, and savings every single month.</p>
+        <div class="learn-steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Track every dollar for 30 days</strong><span>Use your bank app or a free tool like Mint. You can't manage what you don't measure.</span></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Set up a "pay yourself first" system</strong><span>Move 20% to savings the moment money hits your account — before you spend anything.</span></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Build a 3-month emergency fund</strong><span>$1,000–$3,000 in a high-yield savings account is your financial seatbelt.</span></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Automate, then forget it</strong><span>Set up automatic transfers so saving happens without willpower. Systems beat motivation.</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="tip-box">
+          <div class="tip-label">💡 Pro Tips for Teens</div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Open a high-yield savings account</strong> — they pay 10x more interest than regular accounts.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>50/30/20 split:</strong> 50% needs (rent, food), 30% wants (fun), 20% saving/investing.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Avoid lifestyle inflation.</strong> When your income rises, save the extra first before upgrading your lifestyle.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Sinking funds</strong> = save small amounts monthly for big expenses like trips, phones, or a car.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>The latte factor is real.</strong> $5/day = $1,825/year. That's a flight fund or investing seed money.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INVESTING -->
+    <div class="tab-content" id="tab-investing">
+      <div class="learn-text">
+        <h3>How $100/Month Becomes $1,000,000</h3>
+        <p>The single most powerful thing a teenager can do: start investing early. Compound interest means your returns earn returns — and time is the key ingredient.</p>
+        <p>If you invest $100/month starting at age 18, at a 10% annual return (the S&P 500 historical average), you'll have over $1 million by 65. Start at 30? You'll have $300k less.</p>
+        <div class="learn-steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Open a brokerage or Roth IRA account</strong><span>Fidelity, Schwab, or Vanguard are the GOAT options. Roth IRA = tax-free growth forever.</span></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Start with index funds (S&P 500)</strong><span>VOO or VTI track the top 500 US companies. You own a tiny piece of them all.</span></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Set up automatic monthly buys</strong><span>Dollar-cost averaging = invest the same amount every month, ignoring market noise.</span></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Never panic-sell in a crash</strong><span>Downturns are sales on stocks. The people who held through 2008 and 2020 won big.</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="tip-box">
+          <div class="tip-label">📊 Key Investing Terms</div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Index Fund:</strong> A basket of stocks that tracks a market index. Low risk, low fees, high returns over time.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>ETF:</strong> Like an index fund but trades like a stock. VTI, SPY, QQQ are the big ones.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Compound Interest:</strong> You earn returns on your returns. It's exponential growth — Einstein called it the 8th wonder.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Roth IRA:</strong> Invest post-tax money. All future growth is 100% tax-free when you withdraw at 60.</span></div>
+          <div class="tip-item"><div class="tip-dot"></div><span><strong>Diversification:</strong> Don't put all eggs in one basket. Spread money across many companies/assets.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCKS -->
+    <div class="tab-content" id="tab-stocks">
+      <div class="learn-text">
+        <h3>How the Stock Market Actually Works</h3>
+        <p>A stock is a small ownership stake in a real company. When you buy Apple stock, you literally own a tiny fraction of Apple — its products, profits, and future.</p>
+        <p>Stock prices move based on supply and demand, driven by company performance, economic news, and market psychology. The trick is not to react to daily noise.</p>
+        <div class="learn-steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Understand bull vs bear markets</strong><span>Bull = prices rising (economy is strong). Bear = prices falling 20%+ (recession fears).</span></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Read a basic stock chart</strong><span>Price on Y-axis, time on X-axis. Moving averages (50-day, 200-day) show trends.</span></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Learn 3 key metrics</strong><span>P/E ratio (price vs earnings), market cap (company size), dividend yield (passive income).</span></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Paper trade before using real money</strong><span>Use a free simulator like Investopedia to practice without risk until you're confident.</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="tip-box">
+          <div class="tip-label">⚠️ Avoid These Mistakes</div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--orange)"></div><span><strong>FOMO buying:</strong> Never buy a stock just because everyone is hyping it on social media.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--orange)"></div><span><strong>Day trading:</strong> 90% of day traders lose money. It's gambling, not investing.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--orange)"></div><span><strong>Meme stocks:</strong> GME, AMC hype is real — but most people buy at the top and lose big.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--orange)"></div><span><strong>Timing the market:</strong> "Time in the market beats timing the market" — every time.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--lime)"></div><span><strong>The winning formula:</strong> Low-cost index funds + consistent contributions + long time horizon = wealth.</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- BUSINESS -->
+    <div class="tab-content" id="tab-business">
+      <div class="learn-text">
+        <h3>From Zero to Your First Business</h3>
+        <p>Every billion-dollar company started as someone's side project. The best time to start a business is when you're young — low overhead, high energy, and nothing to lose.</p>
+        <p>You don't need money to start. You need a skill someone will pay for, a problem people have, and the courage to offer your solution.</p>
+        <div class="learn-steps">
+          <div class="step"><div class="step-num">1</div><div class="step-text"><strong>Find your monetizable skill</strong><span>Video editing, design, coding, tutoring, social media — if you're good at something, someone will pay for it.</span></div></div>
+          <div class="step"><div class="step-num">2</div><div class="step-text"><strong>Validate before you build</strong><span>Sell to 3 customers before building your product. Proof of demand = less wasted time.</span></div></div>
+          <div class="step"><div class="step-num">3</div><div class="step-text"><strong>Start lean, then scale</strong><span>Use free tools: Instagram for marketing, Canva for design, Stripe for payments. No overhead needed.</span></div></div>
+          <div class="step"><div class="step-num">4</div><div class="step-text"><strong>Reinvest your first profits</strong><span>Don't spend early revenue on yourself. Reinvest in marketing, tools, and skills to grow faster.</span></div></div>
+        </div>
+      </div>
+      <div>
+        <div class="tip-box">
+          <div class="tip-label">🚀 Business Ideas Under $100</div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--purple)"></div><span><strong>Freelance service:</strong> Design, copywriting, video editing, web dev on Fiverr or Upwork.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--purple)"></div><span><strong>Content creation:</strong> YouTube, TikTok, Instagram — build an audience and monetize with ads/brand deals.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--purple)"></div><span><strong>Reselling:</strong> Flip thrift store finds, sneakers, or electronics on eBay, StockX, Depop.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--purple)"></div><span><strong>Print-on-demand:</strong> Design t-shirts, phone cases on Printify — no inventory needed.</span></div>
+          <div class="tip-item"><div class="tip-dot" style="background:var(--purple)"></div><span><strong>Tutoring/coaching:</strong> Get paid to teach what you already know — math, music, sports, coding.</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STOCKS DEMO -->
+<section id="stocks" style="padding-top: 0;">
+  <div class="section-tag">Market Watch</div>
+  <h2 class="section-title">Real companies,<br>real numbers to study</h2>
+  <p class="section-sub">Get familiar with major stocks. Understanding how these companies perform helps you recognize patterns.</p>
+  <div class="stocks-demo fade-in">
+    <div class="stocks-header">
+      <h3>Top Stocks to Know</h3>
+      <div class="live-badge"><div class="live-dot"></div> Educational Data</div>
+    </div>
+    <div class="stocks-grid" id="stocksGrid"></div>
+  </div>
+</section>
+
+<!-- BUSINESS IDEAS -->
+<section id="business">
+  <div class="section-tag">Entrepreneurship</div>
+  <h2 class="section-title">Build your first<br>income stream today</h2>
+  <p class="section-sub">Real businesses teens and young adults are running right now, with step-by-step breakdowns.</p>
+  <div class="biz-grid">
+    <div class="biz-card fade-in">
+      <div class="biz-num">01</div>
+      <div class="biz-icon">🎨</div>
+      <h4>Creative Services</h4>
+      <p>Sell your design, video, photo, or writing skills to businesses and creators who need content daily.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">Logo Design</span><span class="idea-tag">Video Editing</span>
+        <span class="idea-tag">Copywriting</span><span class="idea-tag">Photography</span>
+      </div>
+    </div>
+    <div class="biz-card fade-in">
+      <div class="biz-num">02</div>
+      <div class="biz-icon">📱</div>
+      <h4>Digital Products</h4>
+      <p>Create once, sell forever. Digital templates, eBooks, presets, and courses = passive income.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">Notion Templates</span><span class="idea-tag">Lightroom Presets</span>
+        <span class="idea-tag">Mini-courses</span><span class="idea-tag">Stock Photos</span>
+      </div>
+    </div>
+    <div class="biz-card fade-in">
+      <div class="biz-num">03</div>
+      <div class="biz-icon">🛍️</div>
+      <h4>E-commerce</h4>
+      <p>Buy low, sell higher. From thrift store flipping to Shopify stores, physical products are still king.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">Thrift Flipping</span><span class="idea-tag">Sneaker Resell</span>
+        <span class="idea-tag">Print-on-Demand</span><span class="idea-tag">Amazon FBA</span>
+      </div>
+    </div>
+    <div class="biz-card fade-in">
+      <div class="biz-num">04</div>
+      <div class="biz-icon">🧠</div>
+      <h4>Teach What You Know</h4>
+      <p>If you're good at something, teach it. Tutoring, coaching, and online courses have massive demand.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">Math Tutoring</span><span class="idea-tag">Music Lessons</span>
+        <span class="idea-tag">Fitness Coaching</span><span class="idea-tag">SAT Prep</span>
+      </div>
+    </div>
+    <div class="biz-card fade-in">
+      <div class="biz-num">05</div>
+      <div class="biz-icon">📣</div>
+      <h4>Social Media & Content</h4>
+      <p>Build an audience around your interest. Monetize with sponsorships, affiliate links, and merchandise.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">YouTube</span><span class="idea-tag">TikTok</span>
+        <span class="idea-tag">Newsletter</span><span class="idea-tag">Podcast</span>
+      </div>
+    </div>
+    <div class="biz-card fade-in">
+      <div class="biz-num">06</div>
+      <div class="biz-icon">⚙️</div>
+      <h4>Tech & Automation</h4>
+      <p>Build software, apps, or automations that solve real problems. The most scalable type of business.</p>
+      <div class="biz-ideas">
+        <span class="idea-tag">SaaS App</span><span class="idea-tag">No-Code Tools</span>
+        <span class="idea-tag">AI Products</span><span class="idea-tag">Chatbots</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- QUIZ -->
+<section id="quiz" style="padding-top: 0;">
+  <div class="section-tag">Test Your Knowledge</div>
+  <h2 class="section-title">How money-smart<br>are you really?</h2>
+  <p class="section-sub">Take this quick quiz to test what you've learned and find your weak spots.</p>
+  <div class="quiz-section fade-in">
+    <div class="quiz-intro">
+      <h3>Financial IQ Quiz 🧠</h3>
+      <div class="score-badge">Score: <span id="scoreDisplay">0</span>/<span id="totalDisplay">10</span></div>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width: 0%"></div></div>
+    <div class="question-box" id="questionBox"></div>
+    <div class="feedback" id="feedback"></div>
+    <div class="quiz-nav">
+      <button id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+    </div>
+    <div id="quizResult" style="display:none; text-align:center; padding: 32px 0;">
+      <div style="font-size:3rem; margin-bottom:16px" id="resultEmoji">🎉</div>
+      <h3 style="font-family:var(--font-display);font-size:1.8rem;font-weight:800;margin-bottom:10px" id="resultTitle">Nice work!</h3>
+      <p style="color:var(--muted);margin-bottom:24px" id="resultMsg">Keep learning and your score will grow!</p>
+      <button onclick="restartQuiz()" style="background:var(--lime);color:#0a0a0f;border:none;padding:14px 32px;border-radius:50px;font-family:var(--font-display);font-weight:700;font-size:0.95rem;cursor:pointer;">Try Again 🔄</button>
+    </div>
+  </div>
+</section>
+
+<!-- GLOSSARY -->
+<section id="glossary">
+  <div class="section-tag">Glossary</div>
+  <h2 class="section-title">The money dictionary<br>you actually need</h2>
+  <p class="section-sub">50 essential financial terms, clearly defined. Bookmark this and refer back often.</p>
+  <div class="glossary-grid" id="glossaryGrid"></div>
+</section>
+
+<!-- RESOURCES -->
+<section>
+  <div class="section-tag">Go Deeper</div>
+  <h2 class="section-title">Best free resources<br>to level up fast</h2>
+  <p class="section-sub">Curated books, tools, and platforms that turn knowledge into action.</p>
+  <div class="resources-grid">
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(201,241,53,0.12)">📖</div>
+      <div>
+        <h4>Rich Dad Poor Dad</h4>
+        <p>Robert Kiyosaki's classic on assets vs liabilities and financial independence mindset. Must-read #1.</p>
+        <div class="resource-type" style="color:var(--lime)">📚 Book</div>
+      </div>
+    </div>
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(0,229,195,0.12)">📖</div>
+      <div>
+        <h4>The Psychology of Money</h4>
+        <p>Morgan Housel explains how your mindset about money matters more than any financial strategy.</p>
+        <div class="resource-type" style="color:var(--teal)">📚 Book</div>
+      </div>
+    </div>
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(155,93,229,0.12)">🖥️</div>
+      <div>
+        <h4>Investopedia Stock Simulator</h4>
+        <p>Practice buying and selling stocks with $100k of fake money. Zero risk, real market education.</p>
+        <div class="resource-type" style="color:var(--purple)">🛠️ Free Tool</div>
+      </div>
+    </div>
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(255,107,53,0.12)">🎥</div>
+      <div>
+        <h4>Khan Academy Finance</h4>
+        <p>Free in-depth courses on personal finance, investing, and economics. Great for visual learners.</p>
+        <div class="resource-type" style="color:var(--orange)">🎓 Course</div>
+      </div>
+    </div>
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(247,37,133,0.12)">📱</div>
+      <div>
+        <h4>Robinhood / Fidelity Youth</h4>
+        <p>Beginner-friendly investing apps. Fidelity has a Youth Account for teens under 18 with parental ok.</p>
+        <div class="resource-type" style="color:var(--pink)">📱 App</div>
+      </div>
+    </div>
+    <div class="resource-card fade-in">
+      <div class="resource-icon" style="background:rgba(255,214,10,0.12)">📖</div>
+      <div>
+        <h4>I Will Teach You To Be Rich</h4>
+        <p>Ramit Sethi's no-BS guide to automating finances, investing, and building wealth in your 20s and 30s.</p>
+        <div class="resource-type" style="color:var(--yellow)">📚 Book</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section fade-in">
+  <h2>Your money journey<br>starts <span style="color:var(--lime)">right now.</span></h2>
+  <p>Every wealthy person started somewhere. The difference? They started. Take the first step and share this with a friend who needs it.</p>
+  <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;">
+    <a href="#learn" class="btn-primary">Review Everything →</a>
+    <button onclick="sharesite()" class="btn-ghost">Share This Site 🔗</button>
+  </div>
+</div>
+
 <footer>
-  <p>© 2026 Alex Ventures</p>
+  <p>© 2025 MoneyMoves — Financial Education for Gen Z 💸</p>
+  <div class="footer-links">
+    <a href="#learn">Learn</a>
+    <a href="#stocks">Stocks</a>
+    <a href="#business">Business</a>
+    <a href="#quiz">Quiz</a>
+    <a href="#glossary">Glossary</a>
+  </div>
 </footer>
 
+<script>
+// TAB SWITCHING
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+  document.getElementById(`tab-${name}`).classList.add('active');
+}
+
+// STOCKS DATA
+const stocks = [
+  { ticker: 'AAPL', name: 'Apple Inc.', price: 189.30, change: +1.82, pct: +0.97, color: '#c9f135', data: [182,183,185,184,187,186,188,187,189,189] },
+  { ticker: 'GOOGL', name: 'Alphabet Inc.', price: 174.50, change: -0.75, pct: -0.43, color: '#00e5c3', data: [176,175,177,174,173,174,175,174,174,175] },
+  { ticker: 'MSFT', name: 'Microsoft Corp.', price: 420.15, change: +3.40, pct: +0.81, color: '#9b5de5', data: [414,415,417,416,418,417,419,418,420,420] },
+  { ticker: 'NVDA', name: 'NVIDIA Corp.', price: 875.22, change: +22.10, pct: +2.59, color: '#ff6b35', data: [840,845,852,848,855,860,858,865,870,875] },
+  { ticker: 'TSLA', name: 'Tesla Inc.', price: 245.60, change: -4.30, pct: -1.72, color: '#f72585', data: [252,250,248,246,244,246,248,246,245,246] },
+  { ticker: 'SPY', name: 'S&P 500 ETF', price: 523.40, change: +2.15, pct: +0.41, color: '#ffd60a', data: [518,519,520,520,521,521,522,522,523,523] },
+];
+
+function miniChartPath(data, color) {
+  const min = Math.min(...data), max = Math.max(...data);
+  const w = 140, h = 36, pad = 2;
+  const pts = data.map((v, i) => {
+    const x = pad + (i / (data.length - 1)) * (w - 2 * pad);
+    const y = pad + (1 - (v - min) / (max - min || 1)) * (h - 2 * pad);
+    return `${x},${y}`;
+  });
+  return `<svg viewBox="0 0 ${w} ${h}" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="${pts.join(' ')}" stroke="${color}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
+const grid = document.getElementById('stocksGrid');
+stocks.forEach(s => {
+  const pos = s.change >= 0;
+  grid.innerHTML += `
+    <div class="stock-card">
+      <div class="stock-ticker" style="color:${s.color}">${s.ticker}</div>
+      <div class="stock-name">${s.name}</div>
+      <div class="stock-price">$${s.price.toFixed(2)}</div>
+      <div class="stock-change ${pos ? 'pos' : 'neg'}">${pos ? '▲' : '▼'} ${Math.abs(s.pct).toFixed(2)}% (${pos ? '+' : ''}$${s.change.toFixed(2)})</div>
+      <div class="mini-chart">${miniChartPath(s.data, pos ? '#22c55e' : '#ef4444')}</div>
+    </div>`;
+});
+
+// QUIZ
+const questions = [
+  { q: "What is compound interest?", opts: ["Interest you pay on a loan", "Earning interest on your interest over time", "A type of savings account", "A government tax"], ans: 1, exp: "Compound interest means you earn returns on your previous returns — it's exponential growth. Einstein called it the '8th wonder of the world'!" },
+  { q: "What does 'diversification' mean in investing?", opts: ["Only buying tech stocks", "Putting all money in one safe asset", "Spreading investments across different assets to reduce risk", "Selling stocks when they drop"], ans: 2, exp: "Diversification means not putting all your eggs in one basket. Spreading money across different stocks, sectors, or asset types reduces your overall risk." },
+  { q: "A Roth IRA is best described as:", opts: ["A checking account with no fees", "A savings account that pays high interest", "An investment account where growth is tax-free", "A government loan program"], ans: 2, exp: "A Roth IRA lets you invest post-tax money. All future gains and withdrawals are 100% tax-free — making it one of the best tools for young investors." },
+  { q: "What is an ETF?", opts: ["A government bond", "A fund traded on a stock exchange that tracks a basket of assets", "A type of credit card", "An emergency tax fund"], ans: 1, exp: "An ETF (Exchange-Traded Fund) is a basket of investments (like stocks) that trades on an exchange. Examples: VOO (S&P 500), QQQ (tech stocks)." },
+  { q: "In the 50/30/20 rule, what does the 20% represent?", opts: ["Entertainment spending", "Housing costs", "Groceries and food", "Savings and investments"], ans: 3, exp: "The 50/30/20 rule: 50% on needs, 30% on wants, and 20% on savings/investing. The 20% is your wealth-building engine!" },
+  { q: "What does 'P/E ratio' mean in stocks?", opts: ["Profit-to-expense ratio", "Price-to-earnings ratio, showing how expensive a stock is vs its profits", "Performance evaluation ratio", "Public equity ratio"], ans: 1, exp: "P/E ratio = stock price ÷ earnings per share. A high P/E means the stock is expensive relative to earnings. It helps compare how overvalued or undervalued stocks are." },
+  { q: "What is dollar-cost averaging?", opts: ["Exchanging currency at the best rate", "Investing the same fixed amount regularly, regardless of price", "Buying stocks only when prices are low", "Selling investments at peak prices"], ans: 1, exp: "Dollar-cost averaging means investing a fixed amount consistently (e.g., $50/month). When prices drop, you buy more shares. It removes emotion from investing." },
+  { q: "Which is generally the SAFEST long-term investment strategy?", opts: ["Day trading volatile meme stocks", "Investing all money in a single company", "Low-cost diversified index funds held long term", "Cryptocurrency only"], ans: 2, exp: "Low-cost index funds (like S&P 500) spread risk across hundreds of companies. Historically, they've delivered ~10% average annual returns over long periods." },
+  { q: "What's the biggest advantage of starting to invest at age 18 vs age 30?", opts: ["You can take more risks when young", "More years for compound interest to work — much larger final portfolio", "Fewer taxes at a younger age", "Better stock selection skills"], ans: 1, exp: "Time is the most powerful investing variable. Starting at 18 vs 30 can mean hundreds of thousands more dollars at retirement due to 12 extra years of compounding." },
+  { q: "To validate a business idea before investing time and money, you should:", opts: ["Build the full product first, then find customers", "Ask friends if they like it", "Try to get real paying customers before building anything", "Apply for a business loan immediately"], ans: 2, exp: "Validating means proving demand BEFORE you invest heavily. Get someone to pay you — even informally — before building. This saves months of wasted effort." },
+];
+
+let current = 0, score = 0, answered = false;
+const totalQ = questions.length;
+document.getElementById('totalDisplay').textContent = totalQ;
+
+function loadQuestion() {
+  if (current >= totalQ) { showResult(); return; }
+  const q = questions[current];
+  const pct = (current / totalQ) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('questionBox').innerHTML = `
+    <div class="question-text"><strong>Q${current + 1}/${totalQ}:</strong> ${q.q}</div>
+    <div class="options">${q.opts.map((o, i) => `<button class="option" onclick="answer(${i})">${o}</button>`).join('')}</div>
+  `;
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('feedback').textContent = '';
+  document.getElementById('nextBtn').style.display = 'none';
+  answered = false;
+}
+
+function answer(idx) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.option');
+  opts.forEach((o, i) => {
+    o.style.pointerEvents = 'none';
+    if (i === q.ans) o.classList.add('correct');
+    else if (i === idx && idx !== q.ans) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('feedback');
+  if (idx === q.ans) {
+    score++;
+    document.getElementById('scoreDisplay').textContent = score;
+    fb.className = 'feedback show good';
+    fb.textContent = '✅ Correct! ' + q.exp;
+  } else {
+    fb.className = 'feedback show bad';
+    fb.textContent = '❌ Not quite. ' + q.exp;
+  }
+  document.getElementById('nextBtn').style.display = 'inline-block';
+}
+
+function nextQuestion() {
+  current++;
+  loadQuestion();
+}
+
+function showResult() {
+  document.getElementById('progressFill').style.width = '100%';
+  document.getElementById('questionBox').style.display = 'none';
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('quizResult').style.display = 'block';
+  const pct = score / totalQ;
+  let emoji = '🌱', title = 'Keep going!', msg = 'You\'re just getting started. Review the modules above and try again!';
+  if (pct >= 0.9) { emoji = '🏆'; title = 'Financial Genius!'; msg = 'You scored ' + score + '/' + totalQ + '! You\'re ahead of 99% of people your age.'; }
+  else if (pct >= 0.7) { emoji = '🎯'; title = 'Money-Smart!'; msg = 'Solid score (' + score + '/' + totalQ + ')! A bit more studying and you\'ll be untouchable.'; }
+  else if (pct >= 0.5) { emoji = '📚'; title = 'Getting There!'; msg = 'You scored ' + score + '/' + totalQ + '. Read through the modules and you\'ll level up fast.'; }
+  document.getElementById('resultEmoji').textContent = emoji;
+  document.getElementById('resultTitle').textContent = title;
+  document.getElementById('resultMsg').textContent = msg;
+}
+
+function restartQuiz() {
+  current = 0; score = 0; answered = false;
+  document.getElementById('scoreDisplay').textContent = '0';
+  document.getElementById('questionBox').style.display = 'block';
+  document.getElementById('feedback').style.display = '';
+  document.getElementById('quizResult').style.display = 'none';
+  loadQuestion();
+}
+
+loadQuestion();
+
+// GLOSSARY
+const glossaryTerms = [
+  { term: 'Asset', def: 'Something that puts money IN your pocket — rental property, stocks, a business. The key to building wealth.', cat: 'Basics' },
+  { term: 'Liability', def: 'Something that takes money OUT of your pocket — car payments, credit card debt, subscriptions.', cat: 'Basics' },
+  { term: 'Net Worth', def: 'What you own (assets) minus what you owe (liabilities). The true measure of financial health.', cat: 'Basics' },
+  { term: 'Compound Interest', def: 'Earning interest on your interest. A snowball that grows exponentially over time.', cat: 'Investing' },
+  { term: 'Index Fund', def: 'A fund tracking a market index (like S&P 500). Instant diversification, low fees, strong long-term returns.', cat: 'Investing' },
+  { term: 'ETF', def: 'Exchange-Traded Fund. Like a mutual fund but trades like a stock. VTI, VOO, QQQ are examples.', cat: 'Investing' },
+  { term: 'Dividend', def: 'A share of company profits paid to shareholders. Like getting rent from owning a small piece of a company.', cat: 'Stocks' },
+  { term: 'P/E Ratio', def: 'Price-to-Earnings ratio. Tells you how much investors pay for $1 of earnings. Used to gauge if a stock is cheap or expensive.', cat: 'Stocks' },
+  { term: 'Bull Market', def: 'A rising stock market — prices are up 20%+ from recent lows. Economy is growing. Optimism is high.', cat: 'Stocks' },
+  { term: 'Bear Market', def: 'A falling stock market — prices drop 20%+ from recent highs. Often tied to recessions or fear.', cat: 'Stocks' },
+  { term: 'Portfolio', def: 'Your total collection of investments. Think of it like your investing backpack — you choose what goes in.', cat: 'Investing' },
+  { term: 'Roth IRA', def: 'A retirement account where you invest post-tax money. All future growth is 100% tax-free. Start one ASAP.', cat: 'Investing' },
+  { term: 'Dollar-Cost Averaging', def: 'Investing the same fixed amount at regular intervals, regardless of price. Removes emotion, reduces risk.', cat: 'Strategy' },
+  { term: 'Diversification', def: 'Spreading investments across different assets so one bad pick doesn\'t ruin everything.', cat: 'Strategy' },
+  { term: 'Credit Score', def: 'A 300–850 number representing how trustworthy you are with debt. Higher = lower interest rates and better loan terms.', cat: 'Credit' },
+  { term: 'APR', def: 'Annual Percentage Rate — the true yearly cost of borrowing money. Credit card APRs can be 20–30%. Avoid carrying balances.', cat: 'Credit' },
+  { term: 'Inflation', def: 'The rate at which prices rise over time. Why $1 today buys less than $1 ten years ago. Investing beats inflation.', cat: 'Basics' },
+  { term: 'Liquidity', def: 'How quickly you can convert an asset to cash. Cash = most liquid. Real estate = least liquid.', cat: 'Basics' },
+  { term: 'Revenue', def: 'Total money a business earns before expenses. The top line of a financial statement.', cat: 'Business' },
+  { term: 'Profit Margin', def: 'Profit ÷ Revenue. Shows how much of each dollar of sales is actual profit. High margin = more efficient.', cat: 'Business' },
+  { term: 'Equity', def: 'Ownership stake in a company. When you own stock, you own equity.', cat: 'Business' },
+  { term: 'Valuation', def: 'Estimated total worth of a company. Calculated different ways — often revenue or profit × a multiplier.', cat: 'Business' },
+  { term: 'MVP', def: 'Minimum Viable Product. The simplest version of your product that you can test with real customers.', cat: 'Business' },
+  { term: 'ROI', def: 'Return on Investment. How much you gained vs what you spent, expressed as a percentage.', cat: 'Business' },
+];
+
+const gGrid = document.getElementById('glossaryGrid');
+const catColors = { 'Basics': 'var(--teal)', 'Investing': 'var(--lime)', 'Stocks': 'var(--orange)', 'Strategy': 'var(--purple)', 'Credit': 'var(--pink)', 'Business': 'var(--yellow)' };
+glossaryTerms.forEach(g => {
+  gGrid.innerHTML += `<div class="glossary-item"><div class="glossary-term">${g.term}</div><div class="glossary-def">${g.def}</div><div class="glossary-cat" style="color:${catColors[g.cat]||'var(--teal)'}">${g.cat}</div></div>`;
+});
+
+// SCROLL ANIMATIONS
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+// SHARE
+function sharesite() {
+  if (navigator.share) {
+    navigator.share({ title: 'MoneyMoves', text: 'Learn stocks, budgeting & how to start a business!', url: window.location.href });
+  } else {
+    navigator.clipboard.writeText(window.location.href);
+    alert('Link copied! Share it with friends 🔗');
+  }
+}
+</script>
 </body>
 </html>
