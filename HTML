@@ -1,1 +1,2214 @@
+{
+  "name": "finlearn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "next": "^14.0.0",
+    "firebase": "^10.0.0",
+    "zustand": "^4.4.0",
+    "lucide-react": "^0.263.0",
+    "stripe": "^13.0.0",
+    "@stripe/react-stripe-js": "^2.0.0",
+    "@stripe/stripe-js": "^1.46.0",
+    "axios": "^1.6.0"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}
 
+// tailwind.config.js
+/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components/**/*.{js,ts,jsx,tsx,mdx}',
+  ],
+  theme: {
+    extend: {
+      colors: {
+        'dark-bg': '#0B0F1A',
+        'dark-card': '#1A1F2E',
+        'primary': '#4F9DFF',
+        'accent': '#A855F7',
+        'success': '#10B981',
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(135deg, #4F9DFF 0%, #A855F7 100%)',
+        'gradient-dark': 'linear-gradient(135deg, #0B0F1A 0%, #1A1F2E 100%)',
+      },
+    },
+  },
+  plugins: [],
+}
+
+// postcss.config.js
+module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}
+
+// next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+}
+
+module.exports = nextConfig
+
+/* app/globals.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background: #0B0F1A;
+  color: #ffffff;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Glassmorphism */
+.glass {
+  background: rgba(26, 31, 46, 0.8);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(79, 157, 255, 0.1);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInLeft {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out;
+}
+
+.animate-slide-in-left {
+  animation: slideInLeft 0.6s ease-out;
+}
+
+/* Gradients */
+.gradient-text {
+  background: linear-gradient(135deg, #4F9DFF 0%, #A855F7 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+// lib/firebase.js
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const app = initializeApp(firebaseConfig);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+
+export default app;
+
+// lib/store.js
+import { create } from 'zustand';
+
+export const useAuthStore = create((set) => ({
+  user: null,
+  loading: true,
+  setUser: (user) => set({ user }),
+  setLoading: (loading) => set({ loading }),
+  logout: () => set({ user: null }),
+}));
+
+export const useCoursesStore = create((set) => ({
+  courses: [],
+  selectedCourse: null,
+  setCourses: (courses) => set({ courses }),
+  setSelectedCourse: (course) => set({ selectedCourse: course }),
+}));
+
+export const useProgressStore = create((set) => ({
+  completedLessons: [],
+  xp: 0,
+  level: 1,
+  streak: 0,
+  addCompletedLesson: (lessonId) =>
+    set((state) => ({
+      completedLessons: [...state.completedLessons, lessonId],
+      xp: state.xp + 100,
+      level: Math.floor((state.xp + 100) / 500) + 1,
+    })),
+  setStreak: (streak) => set({ streak }),
+}));
+
+// lib/data.js
+export const coursesData = [
+  {
+    id: 'money-basics',
+    title: 'Money Fundamentals',
+    category: 'Money',
+    description: 'Learn the basics of money, income, and budgeting.',
+    icon: '💰',
+    modules: [
+      {
+        id: 'module-1',
+        title: 'Understanding Money',
+        lessons: [
+          {
+            id: 'lesson-1-1',
+            title: 'What is Money?',
+            content: {
+              explanation:
+                'Money is a medium of exchange that we use to trade value. Throughout history, humans have used many forms of money: shells, gold, paper, and today, digital currencies.',
+              keyInsight:
+                'Money is simply a tool. The real wealth is in your skills, knowledge, and ability to create value.',
+              realWorldExample:
+                'When Netflix wanted to grow globally, they needed money to invest in content, servers, and marketing. That money allowed them to create value for millions of users.',
+              billionaireThinking:
+                'Warren Buffett says: "Do not save what is left after spending, but spend what is left after saving." Billionaires understand that money is about prioritizing what matters.',
+              commonMistakes: [
+                'Thinking money = happiness',
+                'Spending before understanding value',
+                'Not tracking where money goes',
+              ],
+              actionSteps: [
+                'Track every dollar you spend for one week',
+                'Identify your top 3 spending categories',
+                'Ask: Does this purchase create or destroy value?',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the primary purpose of money?',
+                options: [
+                  'A medium of exchange',
+                  'To make people happy',
+                  'To buy luxury items',
+                  'To show off',
+                ],
+                correct: 0,
+                explanation: 'Money is fundamentally a medium of exchange that allows us to trade value.',
+              },
+              {
+                question: 'According to Warren Buffett, what should you do first?',
+                options: [
+                  'Spend money freely',
+                  'Save what is left after spending',
+                  'Spend what is left after saving',
+                  'Give all money to charity',
+                ],
+                correct: 2,
+                explanation: 'Buffett emphasizes saving first before spending, which builds wealth over time.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-1-2',
+            title: 'Income vs Wealth',
+            content: {
+              explanation:
+                'Income is money you earn regularly (salary, hourly wage). Wealth is the total value of assets you own minus debts. You can have high income but low wealth if you spend everything.',
+              keyInsight:
+                'Wealth = Assets - Liabilities. Income is how fast money flows in. Wealth is what you keep.',
+              realWorldExample:
+                'A doctor earning $200,000/year has high income. But if they spend $180,000/year, their wealth barely grows. A developer earning $80,000 who saves $40,000/year builds wealth 10x faster.',
+              billionaireThinking:
+                'Naval Ravikant says: "Wealth is measured in time, not money. If you earn $1M but work 80-hour weeks, you are poor in time."',
+              commonMistakes: [
+                'Confusing income with wealth',
+                'Thinking a high salary = rich',
+                'Spending all income immediately',
+              ],
+              actionSteps: [
+                'Calculate your monthly income',
+                'Track your monthly expenses',
+                'Find the difference = monthly wealth building',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the difference between income and wealth?',
+                options: [
+                  'They are the same thing',
+                  'Income flows in, wealth is what you keep',
+                  'Wealth is just more income',
+                  'Income is better',
+                ],
+                correct: 1,
+                explanation: 'Income is the money you earn, while wealth is your net assets.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-1-3',
+            title: 'The 50/30/20 Budget Rule',
+            content: {
+              explanation:
+                'A simple budgeting framework: 50% for needs (food, rent), 30% for wants (entertainment, dining out), 20% for savings and debt repayment.',
+              keyInsight:
+                'This rule makes budgeting simple and sustainable. Most people fail budgets because they are too complicated.',
+              realWorldExample:
+                'If you earn $2,000/month: $1,000 needs, $600 wants, $400 savings. After 5 years, you have $24,000 saved without feeling deprived.',
+              billionaireThinking:
+                'Ray Dalio emphasizes: "Know your numbers." Understanding cash flow is the foundation of all wealth.',
+              commonMistakes: [
+                'Spending 100% of income',
+                'Thinking budget means suffering',
+                'Not adjusting budget when income changes',
+              ],
+              actionSteps: [
+                'Calculate 50%, 30%, 20% of your income',
+                'List all needs, wants, and savings goals',
+                'Use an app to track spending',
+              ],
+            },
+            quiz: [
+              {
+                question: 'In the 50/30/20 rule, what percentage goes to savings?',
+                options: ['50%', '30%', '20%', '10%'],
+                correct: 2,
+                explanation: 'The 50/30/20 rule allocates 20% to savings and debt repayment.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'stocks-investing',
+    title: 'Stock Market Basics',
+    category: 'Investing',
+    description: 'Understanding stocks, index funds, and long-term investing.',
+    icon: '📈',
+    modules: [
+      {
+        id: 'module-2',
+        title: 'Introduction to Stocks',
+        lessons: [
+          {
+            id: 'lesson-2-1',
+            title: 'Understanding Stock Ownership',
+            content: {
+              explanation:
+                'When you buy a stock, you own a small piece of a company. If the company grows, your piece grows in value. Companies sell stocks to raise money for growth.',
+              keyInsight:
+                'Stocks = Ownership. When you buy Apple stock, you literally own a tiny piece of Apple.',
+              realWorldExample:
+                'When Tesla went public, people who bought $1,000 of stock in 2010 had $230,000 by 2023. That is 230x return from owning a growing company.',
+              billionaireThinking:
+                'Charlie Munger: "The stock market is the greatest wealth-building tool for regular people. Ignore the noise, buy great companies, hold for decades."',
+              commonMistakes: [
+                'Thinking stocks are gambling',
+                'Trying to time the market',
+                'Selling during downturns',
+              ],
+              actionSteps: [
+                'Open a brokerage account (Fidelity, Vanguard, etc.)',
+                'Buy one share of a company you understand',
+                'Read the company annual report',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What does it mean to own a stock?',
+                options: [
+                  'You are betting on the stock price',
+                  'You own a piece of the company',
+                  'You are loaning money to the company',
+                  'You are guaranteed to make money',
+                ],
+                correct: 1,
+                explanation: 'Stock ownership means you own a literal share of the company.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-2-2',
+            title: 'Index Funds and Diversification',
+            content: {
+              explanation:
+                'An index fund holds many stocks in one fund (e.g., S&P 500 has 500 companies). Instead of picking individual stocks, you own the whole market.',
+              keyInsight:
+                'Diversification = Safety. Owning 500 companies is safer than owning 1 company.',
+              realWorldExample:
+                'The S&P 500 has returned ~10% per year historically. Someone who invested $5,000/year for 30 years would have ~$800,000.',
+              billionaireThinking:
+                'Warren Buffett recommends: "90% of my money goes to an S&P 500 index fund." Even billionaires use simple index funds.',
+              commonMistakes: [
+                'Thinking you need to pick individual stocks',
+                'Paying high fees for actively managed funds',
+                'Not investing at all',
+              ],
+              actionSteps: [
+                'Research low-cost index funds (VOO, VTI, SPY)',
+                'Start with $100 in an S&P 500 index fund',
+                'Set up automatic monthly investments',
+              ],
+            },
+            quiz: [
+              {
+                question: 'Why are index funds safer than individual stocks?',
+                options: [
+                  'They always make money',
+                  'They spread risk across many companies',
+                  'They are government guaranteed',
+                  'They never lose money',
+                ],
+                correct: 1,
+                explanation: 'Index funds reduce risk through diversification across multiple companies.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-2-3',
+            title: 'The Power of Compound Interest',
+            content: {
+              explanation:
+                'Compound interest is earning returns on your returns. It accelerates wealth growth exponentially over time.',
+              keyInsight:
+                'Albert Einstein called it the 8th wonder of the world. Time is your best friend in investing.',
+              realWorldExample:
+                '$10,000 at 10% annual return: After 10 years = $25,937. After 30 years = $174,494. After 50 years = $1,173,908.',
+              billionaireThinking:
+                'Start investing young, even with small amounts. 20 years of compound interest beats 5 years of huge returns.',
+              commonMistakes: [
+                'Waiting until you have a lot of money',
+                'Withdrawing money early',
+                'Trying to time the market',
+              ],
+              actionSteps: [
+                'Use a compound calculator online',
+                'Invest $50/month for 30 years',
+                'See how much compound interest adds',
+              ],
+            },
+            quiz: [
+              {
+                question: 'Why is starting early important for compound interest?',
+                options: [
+                  'You have more time for money to grow',
+                  'Early money has better returns',
+                  'You are guaranteed to get rich',
+                  'It does not matter when you start',
+                ],
+                correct: 0,
+                explanation: 'Time is critical for compound interest. Starting early gives your money decades to multiply.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'business-101',
+    title: 'Business Fundamentals',
+    category: 'Business',
+    description: 'Learn how businesses work and create value.',
+    icon: '💼',
+    modules: [
+      {
+        id: 'module-3',
+        title: 'Business Basics',
+        lessons: [
+          {
+            id: 'lesson-3-1',
+            title: 'What is a Business?',
+            content: {
+              explanation:
+                'A business is an organization that creates and sells value to customers in exchange for money. Every business solves a problem.',
+              keyInsight:
+                'Business = Problem Solver. The bigger the problem you solve, the more money you make.',
+              realWorldExample:
+                'Uber solved the problem of convenient transportation. Airbnb solved the problem of finding accommodation. Netflix solved the problem of entertainment. Each generates billions.',
+              billionaireThinking:
+                'Steve Jobs: "The only way to do great work is to love what you do." Great businesses are built by people solving problems they care about.',
+              commonMistakes: [
+                'Starting a business without a real problem to solve',
+                'Ignoring customer feedback',
+                'Not thinking about money/profit',
+              ],
+              actionSteps: [
+                'Identify a problem you face daily',
+                'Ask 10 people if they have the same problem',
+                'Think about how you would solve it',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the fundamental purpose of a business?',
+                options: [
+                  'To make the owner rich',
+                  'To employ people',
+                  'To create and deliver value',
+                  'To become famous',
+                ],
+                correct: 2,
+                explanation: 'At its core, a business creates and delivers value to customers.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'wealth-mindset',
+    title: 'Wealth Mindset',
+    category: 'Mindset',
+    description: 'Develop the psychology and mindset of wealthy people.',
+    icon: '🧠',
+    modules: [
+      {
+        id: 'module-4',
+        title: 'Money Mindset',
+        lessons: [
+          {
+            id: 'lesson-4-1',
+            title: 'Scarcity vs Abundance Thinking',
+            content: {
+              explanation:
+                'Scarcity mindset: "There is not enough. I need to hoard." Abundance mindset: "Opportunity is everywhere. I can create more." Your mindset determines your financial outcomes.',
+              keyInsight:
+                'Wealthy people think abundance. Poor people think scarcity. Your thoughts shape your reality.',
+              realWorldExample:
+                'Same job, same salary. Person A thinks "I will never have enough" and spends everything. Person B thinks "I can build wealth" and saves 30%. After 20 years, Person B is a millionaire.',
+              billionaireThinking:
+                'Elon Musk: "If you are not failing, you are not innovating." Abundance thinking means seeing opportunities, not threats.',
+              commonMistakes: [
+                'Believing money is evil',
+                'Thinking rich people are lucky',
+                'Resenting others wealth',
+              ],
+              actionSteps: [
+                'Notice your money thoughts today',
+                'Replace scarcity thoughts with abundance thoughts',
+                'Read about 3 self-made billionaires',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the difference between scarcity and abundance mindset?',
+                options: [
+                  'Scarcity = saving, Abundance = spending',
+                  'Scarcity = limiting beliefs, Abundance = seeing opportunities',
+                  'Scarcity = for poor people, Abundance = for rich people',
+                  'There is no difference',
+                ],
+                correct: 1,
+                explanation: 'Scarcity mindset focuses on limitations, while abundance mindset sees opportunities.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const getCourseById = (id) => coursesData.find((c) => c.id === id);
+
+export const getLessonById = (courseId, lessonId) => {
+  const course = getCourseById(courseId);
+  if (!course) return null;
+  for (const module of course.modules) {
+    const lesson = module.lessons.find((l) => l.id === lessonId);
+    if (lesson) return lesson;
+  }
+  return null;
+};
+
+export const getAllLessons = () => {
+  const lessons = [];
+  coursesData.forEach((course) => {
+    course.modules.forEach((module) => {
+      module.lessons.forEach((lesson) => {
+        lessons.push({ ...lesson, courseId: course.id });
+      });
+    });
+  });
+  return lessons;
+
+// lib/data.js
+export const coursesData = [
+  {
+    id: 'money-basics',
+    title: 'Money Fundamentals',
+    category: 'Money',
+    description: 'Learn the basics of money, income, and budgeting.',
+    icon: '💰',
+    modules: [
+      {
+        id: 'module-1',
+        title: 'Understanding Money',
+        lessons: [
+          {
+            id: 'lesson-1-1',
+            title: 'What is Money?',
+            content: {
+              explanation:
+                'Money is a medium of exchange that we use to trade value. Throughout history, humans have used many forms of money: shells, gold, paper, and today, digital currencies.',
+              keyInsight:
+                'Money is simply a tool. The real wealth is in your skills, knowledge, and ability to create value.',
+              realWorldExample:
+                'When Netflix wanted to grow globally, they needed money to invest in content, servers, and marketing. That money allowed them to create value for millions of users.',
+              billionaireThinking:
+                'Warren Buffett says: "Do not save what is left after spending, but spend what is left after saving." Billionaires understand that money is about prioritizing what matters.',
+              commonMistakes: [
+                'Thinking money = happiness',
+                'Spending before understanding value',
+                'Not tracking where money goes',
+              ],
+              actionSteps: [
+                'Track every dollar you spend for one week',
+                'Identify your top 3 spending categories',
+                'Ask: Does this purchase create or destroy value?',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the primary purpose of money?',
+                options: [
+                  'A medium of exchange',
+                  'To make people happy',
+                  'To buy luxury items',
+                  'To show off',
+                ],
+                correct: 0,
+                explanation: 'Money is fundamentally a medium of exchange that allows us to trade value.',
+              },
+              {
+                question: 'According to Warren Buffett, what should you do first?',
+                options: [
+                  'Spend money freely',
+                  'Save what is left after spending',
+                  'Spend what is left after saving',
+                  'Give all money to charity',
+                ],
+                correct: 2,
+                explanation: 'Buffett emphasizes saving first before spending, which builds wealth over time.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-1-2',
+            title: 'Income vs Wealth',
+            content: {
+              explanation:
+                'Income is money you earn regularly (salary, hourly wage). Wealth is the total value of assets you own minus debts. You can have high income but low wealth if you spend everything.',
+              keyInsight:
+                'Wealth = Assets - Liabilities. Income is how fast money flows in. Wealth is what you keep.',
+              realWorldExample:
+                'A doctor earning $200,000/year has high income. But if they spend $180,000/year, their wealth barely grows. A developer earning $80,000 who saves $40,000/year builds wealth 10x faster.',
+              billionaireThinking:
+                'Naval Ravikant says: "Wealth is measured in time, not money. If you earn $1M but work 80-hour weeks, you are poor in time."',
+              commonMistakes: [
+                'Confusing income with wealth',
+                'Thinking a high salary = rich',
+                'Spending all income immediately',
+              ],
+              actionSteps: [
+                'Calculate your monthly income',
+                'Track your monthly expenses',
+                'Find the difference = monthly wealth building',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the difference between income and wealth?',
+                options: [
+                  'They are the same thing',
+                  'Income flows in, wealth is what you keep',
+                  'Wealth is just more income',
+                  'Income is better',
+                ],
+                correct: 1,
+                explanation: 'Income is the money you earn, while wealth is your net assets.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-1-3',
+            title: 'The 50/30/20 Budget Rule',
+            content: {
+              explanation:
+                'A simple budgeting framework: 50% for needs (food, rent), 30% for wants (entertainment, dining out), 20% for savings and debt repayment.',
+              keyInsight:
+                'This rule makes budgeting simple and sustainable. Most people fail budgets because they are too complicated.',
+              realWorldExample:
+                'If you earn $2,000/month: $1,000 needs, $600 wants, $400 savings. After 5 years, you have $24,000 saved without feeling deprived.',
+              billionaireThinking:
+                'Ray Dalio emphasizes: "Know your numbers." Understanding cash flow is the foundation of all wealth.',
+              commonMistakes: [
+                'Spending 100% of income',
+                'Thinking budget means suffering',
+                'Not adjusting budget when income changes',
+              ],
+              actionSteps: [
+                'Calculate 50%, 30%, 20% of your income',
+                'List all needs, wants, and savings goals',
+                'Use an app to track spending',
+              ],
+            },
+            quiz: [
+              {
+                question: 'In the 50/30/20 rule, what percentage goes to savings?',
+                options: ['50%', '30%', '20%', '10%'],
+                correct: 2,
+                explanation: 'The 50/30/20 rule allocates 20% to savings and debt repayment.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'stocks-investing',
+    title: 'Stock Market Basics',
+    category: 'Investing',
+    description: 'Understanding stocks, index funds, and long-term investing.',
+    icon: '📈',
+    modules: [
+      {
+        id: 'module-2',
+        title: 'Introduction to Stocks',
+        lessons: [
+          {
+            id: 'lesson-2-1',
+            title: 'Understanding Stock Ownership',
+            content: {
+              explanation:
+                'When you buy a stock, you own a small piece of a company. If the company grows, your piece grows in value. Companies sell stocks to raise money for growth.',
+              keyInsight:
+                'Stocks = Ownership. When you buy Apple stock, you literally own a tiny piece of Apple.',
+              realWorldExample:
+                'When Tesla went public, people who bought $1,000 of stock in 2010 had $230,000 by 2023. That is 230x return from owning a growing company.',
+              billionaireThinking:
+                'Charlie Munger: "The stock market is the greatest wealth-building tool for regular people. Ignore the noise, buy great companies, hold for decades."',
+              commonMistakes: [
+                'Thinking stocks are gambling',
+                'Trying to time the market',
+                'Selling during downturns',
+              ],
+              actionSteps: [
+                'Open a brokerage account (Fidelity, Vanguard, etc.)',
+                'Buy one share of a company you understand',
+                'Read the company annual report',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What does it mean to own a stock?',
+                options: [
+                  'You are betting on the stock price',
+                  'You own a piece of the company',
+                  'You are loaning money to the company',
+                  'You are guaranteed to make money',
+                ],
+                correct: 1,
+                explanation: 'Stock ownership means you own a literal share of the company.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-2-2',
+            title: 'Index Funds and Diversification',
+            content: {
+              explanation:
+                'An index fund holds many stocks in one fund (e.g., S&P 500 has 500 companies). Instead of picking individual stocks, you own the whole market.',
+              keyInsight:
+                'Diversification = Safety. Owning 500 companies is safer than owning 1 company.',
+              realWorldExample:
+                'The S&P 500 has returned ~10% per year historically. Someone who invested $5,000/year for 30 years would have ~$800,000.',
+              billionaireThinking:
+                'Warren Buffett recommends: "90% of my money goes to an S&P 500 index fund." Even billionaires use simple index funds.',
+              commonMistakes: [
+                'Thinking you need to pick individual stocks',
+                'Paying high fees for actively managed funds',
+                'Not investing at all',
+              ],
+              actionSteps: [
+                'Research low-cost index funds (VOO, VTI, SPY)',
+                'Start with $100 in an S&P 500 index fund',
+                'Set up automatic monthly investments',
+              ],
+            },
+            quiz: [
+              {
+                question: 'Why are index funds safer than individual stocks?',
+                options: [
+                  'They always make money',
+                  'They spread risk across many companies',
+                  'They are government guaranteed',
+                  'They never lose money',
+                ],
+                correct: 1,
+                explanation: 'Index funds reduce risk through diversification across multiple companies.',
+              },
+            ],
+          },
+          {
+            id: 'lesson-2-3',
+            title: 'The Power of Compound Interest',
+            content: {
+              explanation:
+                'Compound interest is earning returns on your returns. It accelerates wealth growth exponentially over time.',
+              keyInsight:
+                'Albert Einstein called it the 8th wonder of the world. Time is your best friend in investing.',
+              realWorldExample:
+                '$10,000 at 10% annual return: After 10 years = $25,937. After 30 years = $174,494. After 50 years = $1,173,908.',
+              billionaireThinking:
+                'Start investing young, even with small amounts. 20 years of compound interest beats 5 years of huge returns.',
+              commonMistakes: [
+                'Waiting until you have a lot of money',
+                'Withdrawing money early',
+                'Trying to time the market',
+              ],
+              actionSteps: [
+                'Use a compound calculator online',
+                'Invest $50/month for 30 years',
+                'See how much compound interest adds',
+              ],
+            },
+            quiz: [
+              {
+                question: 'Why is starting early important for compound interest?',
+                options: [
+                  'You have more time for money to grow',
+                  'Early money has better returns',
+                  'You are guaranteed to get rich',
+                  'It does not matter when you start',
+                ],
+                correct: 0,
+                explanation: 'Time is critical for compound interest. Starting early gives your money decades to multiply.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'business-101',
+    title: 'Business Fundamentals',
+    category: 'Business',
+    description: 'Learn how businesses work and create value.',
+    icon: '💼',
+    modules: [
+      {
+        id: 'module-3',
+        title: 'Business Basics',
+        lessons: [
+          {
+            id: 'lesson-3-1',
+            title: 'What is a Business?',
+            content: {
+              explanation:
+                'A business is an organization that creates and sells value to customers in exchange for money. Every business solves a problem.',
+              keyInsight:
+                'Business = Problem Solver. The bigger the problem you solve, the more money you make.',
+              realWorldExample:
+                'Uber solved the problem of convenient transportation. Airbnb solved the problem of finding accommodation. Netflix solved the problem of entertainment. Each generates billions.',
+              billionaireThinking:
+                'Steve Jobs: "The only way to do great work is to love what you do." Great businesses are built by people solving problems they care about.',
+              commonMistakes: [
+                'Starting a business without a real problem to solve',
+                'Ignoring customer feedback',
+                'Not thinking about money/profit',
+              ],
+              actionSteps: [
+                'Identify a problem you face daily',
+                'Ask 10 people if they have the same problem',
+                'Think about how you would solve it',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the fundamental purpose of a business?',
+                options: [
+                  'To make the owner rich',
+                  'To employ people',
+                  'To create and deliver value',
+                  'To become famous',
+                ],
+                correct: 2,
+                explanation: 'At its core, a business creates and delivers value to customers.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+  {
+    id: 'wealth-mindset',
+    title: 'Wealth Mindset',
+    category: 'Mindset',
+    description: 'Develop the psychology and mindset of wealthy people.',
+    icon: '🧠',
+    modules: [
+      {
+        id: 'module-4',
+        title: 'Money Mindset',
+        lessons: [
+          {
+            id: 'lesson-4-1',
+            title: 'Scarcity vs Abundance Thinking',
+            content: {
+              explanation:
+                'Scarcity mindset: "There is not enough. I need to hoard." Abundance mindset: "Opportunity is everywhere. I can create more." Your mindset determines your financial outcomes.',
+              keyInsight:
+                'Wealthy people think abundance. Poor people think scarcity. Your thoughts shape your reality.',
+              realWorldExample:
+                'Same job, same salary. Person A thinks "I will never have enough" and spends everything. Person B thinks "I can build wealth" and saves 30%. After 20 years, Person B is a millionaire.',
+              billionaireThinking:
+                'Elon Musk: "If you are not failing, you are not innovating." Abundance thinking means seeing opportunities, not threats.',
+              commonMistakes: [
+                'Believing money is evil',
+                'Thinking rich people are lucky',
+                'Resenting others wealth',
+              ],
+              actionSteps: [
+                'Notice your money thoughts today',
+                'Replace scarcity thoughts with abundance thoughts',
+                'Read about 3 self-made billionaires',
+              ],
+            },
+            quiz: [
+              {
+                question: 'What is the difference between scarcity and abundance mindset?',
+                options: [
+                  'Scarcity = saving, Abundance = spending',
+                  'Scarcity = limiting beliefs, Abundance = seeing opportunities',
+                  'Scarcity = for poor people, Abundance = for rich people',
+                  'There is no difference',
+                ],
+                correct: 1,
+                explanation: 'Scarcity mindset focuses on limitations, while abundance mindset sees opportunities.',
+              },
+            ],
+          },
+        ],
+      },
+    ],
+  },
+];
+
+export const getCourseById = (id) => coursesData.find((c) => c.id === id);
+
+export const getLessonById = (courseId, lessonId) => {
+  const course = getCourseById(courseId);
+  if (!course) return null;
+  for (const module of course.modules) {
+    const lesson = module.lessons.find((l) => l.id === lessonId);
+    if (lesson) return lesson;
+  }
+  return null;
+};
+
+export const getAllLessons = () => {
+  const lessons = [];
+  coursesData.forEach((course) => {
+    course.modules.forEach((module) => {
+      module.lessons.forEach((lesson) => {
+        lessons.push({ ...lesson, courseId: course.id });
+      });
+    });
+  });
+  return lessons;
+};
+
+// app/layout.jsx
+import './globals.css';
+
+export const metadata = {
+  title: 'FinLearn - Financial Education for Teens',
+  description: 'Learn money, investing, business, and wealth building.',
+};
+
+export default function RootLayout({ children }) {
+  return (
+    <html lang="en">
+      <body>{children}</body>
+    </html>
+  );
+}
+
+// components/Navbar.jsx
+'use client';
+
+import Link from 'next/link';
+import { useAuthStore } from '@/lib/store';
+import { Menu, X, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+
+export default function Navbar() {
+  const { user, logout } = useAuthStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    logout();
+    router.push('/');
+  };
+
+  return (
+    <nav className="fixed top-0 w-full z-50 glass border-b border-primary/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold gradient-text">
+          FinLearn
+        </Link>
+
+        <div className="hidden md:flex gap-8 items-center">
+          {user ? (
+            <>
+              <Link href="/dashboard" className="hover:text-primary transition">
+                Dashboard
+              </Link>
+              <Link href="/courses" className="hover:text-primary transition">
+                Courses
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 rounded-lg transition"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hover:text-primary transition">
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="px-6 py-2 bg-gradient-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/50 transition"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {menuOpen && (
+          <div className="absolute top-16 left-0 w-full glass border-b border-primary/10 p-4 md:hidden flex flex-col gap-4">
+            {user ? (
+              <>
+                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/courses">Courses</Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-left"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">Login</Link>
+                <Link href="/signup">Sign Up</Link>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// components/Navbar.jsx
+'use client';
+
+import Link from 'next/link';
+import { useAuthStore } from '@/lib/store';
+import { Menu, X, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { auth } from '@/lib/firebase';
+import { signOut } from 'firebase/auth';
+import { useRouter } from 'next/navigation';
+
+export default function Navbar() {
+  const { user, logout } = useAuthStore();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await signOut(auth);
+    logout();
+    router.push('/');
+  };
+
+  return (
+    <nav className="fixed top-0 w-full z-50 glass border-b border-primary/10">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        <Link href="/" className="text-2xl font-bold gradient-text">
+          FinLearn
+        </Link>
+
+        <div className="hidden md:flex gap-8 items-center">
+          {user ? (
+            <>
+              <Link href="/dashboard" className="hover:text-primary transition">
+                Dashboard
+              </Link>
+              <Link href="/courses" className="hover:text-primary transition">
+                Courses
+              </Link>
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-4 py-2 bg-primary/20 hover:bg-primary/30 rounded-lg transition"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          ) : (
+            <>
+              <Link href="/login" className="hover:text-primary transition">
+                Login
+              </Link>
+              <Link
+                href="/signup"
+                className="px-6 py-2 bg-gradient-primary text-white rounded-lg hover:shadow-lg hover:shadow-primary/50 transition"
+              >
+                Sign Up
+              </Link>
+            </>
+          )}
+        </div>
+
+        <button
+          className="md:hidden"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+
+        {menuOpen && (
+          <div className="absolute top-16 left-0 w-full glass border-b border-primary/10 p-4 md:hidden flex flex-col gap-4">
+            {user ? (
+              <>
+                <Link href="/dashboard">Dashboard</Link>
+                <Link href="/courses">Courses</Link>
+                <button
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-left"
+                >
+                  <LogOut size={18} />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="/login">Login</Link>
+                <Link href="/signup">Sign Up</Link>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </nav>
+  );
+}
+
+// app/page.jsx
+'use client';
+
+import Navbar from '@/components/Navbar';
+import Link from 'next/link';
+import { ArrowRight, Star, TrendingUp, Users, Zap } from 'lucide-react';
+import { coursesData } from '@/lib/data';
+
+export default function HomePage() {
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto text-center animate-fade-in">
+          <h1 className="text-5xl sm:text-7xl font-bold mb-6 gradient-text">
+            Master Money.<br />Build Wealth.<br />Transform Your Future.
+          </h1>
+          <p className="text-xl text-gray-400 mb-10 leading-relaxed">
+            Learn investing, business, and financial intelligence from age 13–25.
+            Replace social media scrolling with high-value learning that actually
+            builds wealth.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/signup"
+              className="px-8 py-4 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition flex items-center justify-center gap-2"
+            >
+              Start Learning Free <ArrowRight size={20} />
+            </Link>
+            <Link
+              href="/courses"
+              className="px-8 py-4 glass rounded-lg font-bold hover:bg-primary/20 transition"
+            >
+              Explore Courses
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-dark-bg to-dark-card/50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
+            Why FinLearn?
+          </h2>
+          <div className="grid md:grid-cols-4 gap-8">
+            {[
+              {
+                icon: Zap,
+                title: 'Addictive Learning',
+                desc: 'Short, engaging lessons designed for the TikTok generation.',
+              },
+              {
+                icon: TrendingUp,
+                title: 'Real Results',
+                desc: 'Learn strategies that actually build wealth long-term.',
+              },
+              {
+                icon: Users,
+                title: 'Young Audience',
+                desc: 'Built for teens and young adults who want financial freedom.',
+              },
+              {
+                icon: Star,
+                title: 'Expert Guidance',
+                desc: 'Lessons from billionaires and financial legends.',
+              },
+            ].map((feature, i) => (
+              <div key={i} className="glass p-6 rounded-xl hover:bg-primary/10 transition">
+                <feature.icon className="text-primary mb-4" size={32} />
+                <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
+                <p className="text-gray-400">{feature.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Categories Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
+            Learn Everything
+          </h2>
+          <div className="grid md:grid-cols-4 gap-6">
+            {[
+              { emoji: '💰', title: 'Money', desc: 'Fundamentals & Budgeting' },
+              { emoji: '📈', title: 'Investing', desc: 'Stocks & Long-term Wealth' },
+              { emoji: '💼', title: 'Business', desc: 'Entrepreneurship & Value' },
+              { emoji: '🧠', title: 'Mindset', desc: 'Psychology of Wealth' },
+            ].map((cat, i) => (
+              <div key={i} className="glass p-8 rounded-xl text-center hover:bg-primary/10 transition cursor-pointer">
+                <div className="text-5xl mb-4">{cat.emoji}</div>
+                <h3 className="text-2xl font-bold mb-2">{cat.title}</h3>
+                <p className="text-gray-400">{cat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Preview Lessons */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-dark-bg to-dark-card/50">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-4xl font-bold text-center mb-16 gradient-text">
+            Featured Courses
+          </h2>
+          <div className="grid md:grid-cols-2 gap-8">
+            {coursesData.map((course) => (
+              <div
+                key={course.id}
+                className="glass p-8 rounded-xl hover:bg-primary/10 transition"
+              >
+                <div className="text-5xl mb-4">{course.icon}</div>
+                <h3 className="text-2xl font-bold mb-2">{course.title}</h3>
+                <p className="text-gray-400 mb-4">{course.description}</p>
+                <Link
+                  href={`/courses/${course.id}`}
+                  className="text-primary hover:text-accent transition flex items-center gap-2"
+                >
+                  View Course <ArrowRight size={18} />
+                </Link>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="py-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto glass p-16 rounded-2xl text-center">
+          <h2 className="text-4xl font-bold mb-6 gradient-text">
+            Ready to Build Wealth?
+          </h2>
+          <p className="text-xl text-gray-400 mb-8">
+            Join thousands of teens learning to master money. Start free today.
+          </p>
+          <Link
+            href="/signup"
+            className="px-8 py-4 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition inline-flex items-center gap-2"
+          >
+            Get Started <ArrowRight size={20} />
+          </Link>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="border-t border-primary/10 py-12 px-4 sm:px-6 lg:px-8 text-gray-400 text-center">
+        <div className="max-w-6xl mx-auto">
+          <p>&copy; 2024 FinLearn. Build wealth, not holes in your pocket.</p>
+          <div className="flex justify-center gap-6 mt-4 text-sm">
+            <a href="#" className="hover:text-primary transition">Privacy</a>
+            <a href="#" className="hover:text-primary transition">Terms</a>
+            <a href="#" className="hover:text-primary transition">Contact</a>
+          </div>
+        </div>
+      </footer>
+    </main>
+  );
+}
+
+// app/signup/page.jsx
+'use client';
+
+import Navbar from '@/components/Navbar';
+import { useState } from 'react';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth, db } from '@/lib/firebase';
+import { setDoc, doc } from 'firebase/firestore';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
+import { ArrowRight, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+
+export default function SignupPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { setUser } = useAuthStore();
+
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!email || !password || !name) {
+        setError('Please fill all fields');
+        setLoading(false);
+        return;
+      }
+
+      const userCredential = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+
+      await setDoc(doc(db, 'users', userCredential.user.uid), {
+        name,
+        email,
+        plan: 'free',
+        xp: 0,
+        level: 1,
+        streak: 0,
+        completedLessons: [],
+        joinedAt: new Date(),
+      });
+
+      setUser({
+        uid: userCredential.user.uid,
+        email,
+        name,
+      });
+
+      router.push('/dashboard');
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto glass p-8 rounded-xl">
+          <h1 className="text-3xl font-bold mb-2 gradient-text">Create Account</h1>
+          <p className="text-gray-400 mb-8">Start learning wealth today.</p>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 p-4 rounded-lg mb-6 flex items-start gap-3">
+              <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-200">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSignup} className="space-y-4">
+            <input
+              type="text"
+              placeholder="Full Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-card rounded-lg border border-primary/20 focus:border-primary outline-none transition"
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-card rounded-lg border border-primary/20 focus:border-primary outline-none transition"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-card rounded-lg border border-primary/20 focus:border-primary outline-none transition"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? 'Creating Account...' : 'Sign Up'} {!loading && <ArrowRight size={20} />}
+            </button>
+          </form>
+
+          <p className="text-gray-400 text-center mt-6">
+            Already have an account?{' '}
+            <Link href="/login" className="text-primary hover:text-accent transition">
+              Login
+            </Link>
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// app/login/page.jsx
+'use client';
+
+import Navbar from '@/components/Navbar';
+import { useState } from 'react';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '@/lib/firebase';
+import { useRouter } from 'next/navigation';
+import { useAuthStore } from '@/lib/store';
+import { ArrowRight, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
+
+export default function LoginPage() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const { setUser } = useAuthStore();
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
+
+    try {
+      if (!email || !password) {
+        setError('Please fill all fields');
+        setLoading(false);
+        return;
+      }
+
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+
+      setUser({
+        uid: userCredential.user.uid,
+        email: userCredential.user.email,
+      });
+
+      router.push('/dashboard');
+    } catch (err) {
+      setError('Invalid email or password');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto glass p-8 rounded-xl">
+          <h1 className="text-3xl font-bold mb-2 gradient-text">Welcome Back</h1>
+          <p className="text-gray-400 mb-8">Login to continue learning.</p>
+
+          {error && (
+            <div className="bg-red-500/20 border border-red-500 p-4 rounded-lg mb-6 flex items-start gap-3">
+              <AlertCircle size={20} className="text-red-500 flex-shrink-0 mt-0.5" />
+              <p className="text-red-200">{error}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <input
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-card rounded-lg border border-primary/20 focus:border-primary outline-none transition"
+            />
+            <input
+              type="password"
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full px-4 py-3 bg-dark-card rounded-lg border border-primary/20 focus:border-primary outline-none transition"
+            />
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {loading ? 'Logging in...' : 'Login'} {!loading && <ArrowRight size={20} />}
+            </button>
+          </form>
+
+          <p className="text-gray-400 text-center mt-6">
+            Don't have an account?{' '}
+            <Link href="/signup" className="text-primary hover:text-accent transition">
+              Sign Up
+            </Link>
+          </p>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// app/dashboard/page.jsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuthStore, useProgressStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { Flame, Zap, Trophy, BookOpen, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
+import { coursesData, getAllLessons } from '@/lib/data';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+export default function DashboardPage() {
+  const { user, loading } = useAuthStore();
+  const router = useRouter();
+  const [userProfile, setUserProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    if (user?.uid) {
+      const fetchProfile = async () => {
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserProfile(docSnap.data());
+        }
+        setProfileLoading(false);
+      };
+      fetchProfile();
+    }
+  }, [user]);
+
+  if (loading || profileLoading) {
+    return (
+      <main className="min-h-screen bg-dark-bg text-white">
+        <Navbar />
+        <div className="pt-32 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-gray-400">Loading your dashboard...</p>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
+
+  const lessons = getAllLessons();
+  const recommendedLessons = lessons.slice(0, 3);
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          {/* Welcome Section */}
+          <div className="mb-12">
+            <h1 className="text-4xl font-bold mb-2 gradient-text">
+              Welcome back, {user?.name || 'Learner'}! 👋
+            </h1>
+            <p className="text-gray-400">Keep building your wealth knowledge.</p>
+          </div>
+
+          {/* Stats Grid */}
+          <div className="grid md:grid-cols-4 gap-6 mb-12">
+            {[
+              {
+                icon: Zap,
+                label: 'XP Points',
+                value: userProfile?.xp || 0,
+                color: 'text-yellow-400',
+              },
+              {
+                icon: Trophy,
+                label: 'Level',
+                value: userProfile?.level || 1,
+                color: 'text-primary',
+              },
+              {
+                icon: Flame,
+                label: 'Streak',
+                value: `${userProfile?.streak || 0} days`,
+                color: 'text-red-400',
+              },
+              {
+                icon: BookOpen,
+                label: 'Lessons Done',
+                value: userProfile?.completedLessons?.length || 0,
+                color: 'text-accent',
+              },
+            ].map((stat, i) => (
+              <div key={i} className="glass p-6 rounded-xl">
+                <stat.icon className={`${stat.color} mb-2`} size={32} />
+                <p className="text-gray-400 text-sm">{stat.label}</p>
+                <p className="text-3xl font-bold mt-2">{stat.value}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Continue Learning & Recommended */}
+          <div className="grid md:grid-cols-2 gap-12">
+            {/* Continue Learning */}
+            <div>
+              <h2 className="text-2xl font-bold mb-6 gradient-text">
+                Continue Learning
+              </h2>
+              <div className="space-y-4">
+                {coursesData.map((course) => (
+                  <Link
+                    key={course.id}
+                    href={`/courses/${course.id}`}
+                    className="glass p-6 rounded-xl hover:bg-primary/10 transition flex items-center justify-between"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div className="text-3xl">{course.icon}</div>
+                      <div>
+                        <h3 className="font-bold">{course.title}</h3>
+                        <p className="text-gray-400 text-sm">
+                          {course.modules.length} modules
+                        </p>
+                      </div>
+                    </div>
+                    <ArrowRight size={20} className="text-primary" />
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* Recommended Lessons */}
+            <div>
+              <h2 className="text-2xl font-bold mb-6 gradient-text">
+                Recommended Lessons
+              </h2>
+              <div className="space-y-4">
+                {recommendedLessons.map((lesson) => (
+                  <Link
+                    key={lesson.id}
+                    href={`/lesson/${lesson.courseId}/${lesson.id}`}
+                    className="glass p-6 rounded-xl hover:bg-primary/10 transition group"
+                  >
+                    <h3 className="font-bold group-hover:text-primary transition mb-2">
+                      {lesson.title}
+                    </h3>
+                    <p className="text-gray-400 text-sm line-clamp-2">
+                      {lesson.content.explanation}
+                    </p>
+                    <p className="text-primary text-sm mt-2">Start Lesson →</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Categories */}
+          <div className="mt-16">
+            <h2 className="text-2xl font-bold mb-6 gradient-text">
+              Browse by Category
+            </h2>
+            <div className="grid md:grid-cols-4 gap-6">
+              {[
+                { emoji: '💰', title: 'Money' },
+                { emoji: '📈', title: 'Investing' },
+                { emoji: '💼', title: 'Business' },
+                { emoji: '🧠', title: 'Mindset' },
+              ].map((cat, i) => (
+                <div key={i} className="glass p-8 rounded-xl text-center hover:bg-primary/10 transition cursor-pointer">
+                  <div className="text-4xl mb-4">{cat.emoji}</div>
+                  <h3 className="font-bold">{cat.title}</h3>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// app/courses/page.jsx
+'use client';
+
+import { useEffect } from 'react';
+import { useAuthStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { coursesData } from '@/lib/data';
+import Link from 'next/link';
+import { ArrowRight } from 'lucide-react';
+
+export default function CoursesPage() {
+  const { user, loading } = useAuthStore();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  if (loading) {
+    return (
+      <main className="min-h-screen bg-dark-bg text-white">
+        <Navbar />
+        <div className="pt-32 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-4xl font-bold mb-4 gradient-text">All Courses</h1>
+          <p className="text-gray-400 mb-12">
+            Choose a course and start building your financial knowledge.
+          </p>
+
+          <div className="grid md:grid-cols-2 gap-8">
+            {coursesData.map((course) => (
+              <Link
+                key={course.id}
+                href={`/courses/${course.id}`}
+                className="glass p-8 rounded-xl hover:bg-primary/10 transition group"
+              >
+                <div className="text-6xl mb-4">{course.icon}</div>
+                <h2 className="text-2xl font-bold mb-2 group-hover:text-primary transition">
+                  {course.title}
+                </h2>
+                <p className="text-gray-400 mb-4">{course.description}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-primary">
+                    {course.modules.length} modules •{' '}
+                    {course.modules.reduce((acc, m) => acc + m.lessons.length, 0)} lessons
+                  </span>
+                  <ArrowRight className="group-hover:translate-x-2 transition" size={20} />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// app/courses/[id]/page.jsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuthStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { getCourseById } from '@/lib/data';
+import Link from 'next/link';
+import { ArrowRight, BookOpen } from 'lucide-react';
+
+export default function CourseDetailPage({ params }) {
+  const { user, loading } = useAuthStore();
+  const router = useRouter();
+  const [course, setCourse] = useState(null);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    const foundCourse = getCourseById(params.id);
+    setCourse(foundCourse);
+  }, [params.id]);
+
+  if (loading || !course) {
+    return (
+      <main className="min-h-screen bg-dark-bg text-white">
+        <Navbar />
+        <div className="pt-32 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Header */}
+          <div className="mb-12">
+            <div className="text-6xl mb-6">{course.icon}</div>
+            <h1 className="text-4xl font-bold mb-4 gradient-text">{course.title}</h1>
+            <p className="text-gray-400 text-lg">{course.description}</p>
+            <div className="mt-6 flex gap-4 text-sm">
+              <span className="text-primary">
+                {course.modules.length} Modules
+              </span>
+              <span className="text-accent">
+                {course.modules.reduce((acc, m) => acc + m.lessons.length, 0)} Lessons
+              </span>
+            </div>
+          </div>
+
+          {/* Modules */}
+          <div className="space-y-8">
+            {course.modules.map((module) => (
+              <div key={module.id} className="glass p-8 rounded-xl">
+                <h2 className="text-2xl font-bold mb-6">{module.title}</h2>
+                <div className="space-y-4">
+                  {module.lessons.map((lesson) => (
+                    <Link
+                      key={lesson.id}
+                      href={`/lesson/${course.id}/${lesson.id}`}
+                      className="p-4 bg-dark-card rounded-lg hover:bg-primary/10 transition flex items-center justify-between group"
+                    >
+                      <div className="flex items-center gap-4">
+                        <BookOpen size={20} className="text-primary" />
+                        <div>
+                          <h3 className="font-bold group-hover:text-primary transition">
+                            {lesson.title}
+                          </h3>
+                          <p className="text-gray-400 text-sm line-clamp-1">
+                            {lesson.content.explanation}
+                          </p>
+                        </div>
+                      </div>
+                      <ArrowRight
+                        size={20}
+                        className="text-primary group-hover:translate-x-2 transition"
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Back Button */}
+          <Link href="/courses" className="mt-12 text-primary hover:text-accent transition flex items-center gap-2">
+            ← Back to Courses
+          </Link>
+        </div>
+      </div>
+    </main>
+  );
+}
+
+// app/lesson/[courseId]/[lessonId]/page.jsx
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useAuthStore, useProgressStore } from '@/lib/store';
+import { useRouter } from 'next/navigation';
+import Navbar from '@/components/Navbar';
+import { getLessonById, getCourseById } from '@/lib/data';
+import Link from 'next/link';
+import { ArrowRight, CheckCircle, AlertCircle } from 'lucide-react';
+import { doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+
+export default function LessonPage({ params }) {
+  const { user, loading } = useAuthStore();
+  const router = useRouter();
+  const { addCompletedLesson, completedLessons } = useProgressStore();
+  
+  const [lesson, setLesson] = useState(null);
+  const [course, setCourse] = useState(null);
+  const [quizStarted, setQuizStarted] = useState(false);
+  const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [score, setScore] = useState(0);
+  const [answered, setAnswered] = useState([]);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [lessonCompleted, setLessonCompleted] = useState(false);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+    }
+  }, [user, loading, router]);
+
+  useEffect(() => {
+    const foundLesson = getLessonById(params.courseId, params.lessonId);
+    const foundCourse = getCourseById(params.courseId);
+    setLesson(foundLesson);
+    setCourse(foundCourse);
+    setLessonCompleted(completedLessons.includes(params.lessonId));
+  }, [params.courseId, params.lessonId, completedLessons]);
+
+  const handleQuizAnswer = (optionIndex) => {
+    const isCorrect = optionIndex === lesson.quiz[currentQuestion].correct;
+    setAnswered([...answered, { question: currentQuestion, answer: optionIndex, correct: isCorrect }]);
+    
+    if (isCorrect) {
+      setScore(score + 1);
+    }
+
+    if (currentQuestion < lesson.quiz.length - 1) {
+      setCurrentQuestion(currentQuestion + 1);
+    } else {
+      setQuizCompleted(true);
+    }
+  };
+
+  const handleCompleteLesson = async () => {
+    addCompletedLesson(params.lessonId);
+    setLessonCompleted(true);
+
+    if (user?.uid) {
+      await updateDoc(doc(db, 'users', user.uid), {
+        completedLessons: arrayUnion(params.lessonId),
+        xp: 100,
+        streak: 1,
+      });
+    }
+  };
+
+  if (loading || !lesson || !course) {
+    return (
+      <main className="min-h-screen bg-dark-bg text-white">
+        <Navbar />
+        <div className="pt-32 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto"></div>
+        </div>
+      </main>
+    );
+  }
+
+  if (!user) return null;
+
+  return (
+    <main className="min-h-screen bg-dark-bg text-white">
+      <Navbar />
+
+      <div className="pt-32 pb-20 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-4xl mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-gray-400 mb-8">
+            <Link href="/courses" className="hover:text-primary transition">
+              Courses
+            </Link>
+            <span>/</span>
+            <Link href={`/courses/${course.id}`} className="hover:text-primary transition">
+              {course.title}
+            </Link>
+            <span>/</span>
+            <span className="text-primary">{lesson.title}</span>
+          </div>
+
+          {/* Lesson Content */}
+          {!quizStarted && (
+            <div className="glass p-12 rounded-xl space-y-8 mb-8">
+              {/* Title */}
+              <div>
+                <h1 className="text-4xl font-bold gradient-text mb-4">{lesson.title}</h1>
+                <div className="flex items-center gap-2 text-green-400">
+                  <CheckCircle size={20} />
+                  <span>+100 XP when completed</span>
+                </div>
+              </div>
+
+              {/* Explanation */}
+              <div>
+                <h2 className="text-xl font-bold mb-3 text-primary">Explanation</h2>
+                <p className="text-gray-300 leading-relaxed">
+                  {lesson.content.explanation}
+                </p>
+              </div>
+
+              {/* Key Insight */}
+              <div className="bg-primary/10 border border-primary/30 p-6 rounded-lg">
+                <h3 className="text-lg font-bold text-primary mb-2">💡 Key Insight</h3>
+                <p className="text-gray-300">{lesson.content.keyInsight}</p>
+              </div>
+
+              {/* Real World Example */}
+              <div>
+                <h2 className="text-xl font-bold mb-3 text-accent">Real-World Example</h2>
+                <p className="text-gray-300 leading-relaxed">
+                  {lesson.content.realWorldExample}
+                </p>
+              </div>
+
+              {/* Billionaire Thinking */}
+              <div className="bg-accent/10 border border-accent/30 p-6 rounded-lg">
+                <h3 className="text-lg font-bold text-accent mb-2">🤑 Billionaire Thinking</h3>
+                <p className="text-gray-300">{lesson.content.billionaireThinking}</p>
+              </div>
+
+              {/* Common Mistakes */}
+              <div>
+                <h2 className="text-xl font-bold mb-3 text-orange-400">⚠️ Common Mistakes</h2>
+                <ul className="space-y-2">
+                  {lesson.content.commonMistakes.map((mistake, i) => (
+                    <li key={i} className="flex items-start gap-3">
+                      <AlertCircle size={20} className="text-orange-400 flex-shrink-0 mt-0.5" />
+                      <span className="text-gray-300">{mistake}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Action Steps */}
+              <div>
+                <h2 className="text-xl font-bold mb-3 text-success">✅ Action Steps</h2>
+                <ol className="space-y-2 list-decimal list-inside">
+                  {lesson.content.actionSteps.map((step, i) => (
+                    <li key={i} className="text-gray-300">{step}</li>
+                  ))}
+                </ol>
+              </div>
+
+              {/* Start Quiz Button */}
+              <button
+                onClick={() => setQuizStarted(true)}
+                className="w-full py-4 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition flex items-center justify-center gap-2"
+              >
+                Start Quiz <ArrowRight size={20} />
+              </button>
+            </div>
+          )}
+
+          {/* Quiz */}
+          {quizStarted && !quizCompleted && (
+            <div className="glass p-12 rounded-xl">
+              <div className="mb-8">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-2xl font-bold">Quiz: {lesson.title}</h2>
+                  <span className="text-primary font-bold">
+                    {currentQuestion + 1}/{lesson.quiz.length}
+                  </span>
+                </div>
+                <div className="w-full bg-dark-card rounded-full h-2">
+                  <div
+                    className="bg-gradient-primary h-2 rounded-full transition-all"
+                    style={{
+                      width: `${((currentQuestion + 1) / lesson.quiz.length) * 100}%`,
+                    }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="mb-8">
+                <h3 className="text-xl font-bold mb-6">
+                  {lesson.quiz[currentQuestion].question}
+                </h3>
+                <div className="space-y-3">
+                  {lesson.quiz[currentQuestion].options.map((option, i) => (
+                    <button
+                      key={i}
+                      onClick={() => handleQuizAnswer(i)}
+                      className="w-full p-4 bg-dark-card rounded-lg hover:bg-primary/20 transition text-left border border-primary/20 hover:border-primary"
+                    >
+                      <p className="font-semibold">{option}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Quiz Results */}
+          {quizCompleted && (
+            <div className="glass p-12 rounded-xl text-center space-y-8">
+              <div>
+                <div className="text-6xl font-bold gradient-text mb-4">
+                  {Math.round((score / lesson.quiz.length) * 100)}%
+                </div>
+                <h2 className="text-3xl font-bold mb-2">Quiz Complete!</h2>
+                <p className="text-gray-400">
+                  You got {score} out of {lesson.quiz.length} questions correct.
+                </p>
+              </div>
+
+              {/* Answer Review */}
+              <div className="text-left space-y-4">
+                <h3 className="text-xl font-bold">Review Your Answers</h3>
+                {answered.map((ans, i) => (
+                  <div
+                    key={i}
+                    className={`p-4 rounded-lg ${
+                      ans.correct
+                        ? 'bg-green-500/10 border border-green-500/30'
+                        : 'bg-red-500/10 border border-red-500/30'
+                    }`}
+                  >
+                    <p className="font-bold mb-2">Question {i + 1}</p>
+                    <p className="text-sm mb-2">{lesson.quiz[i].question}</p>
+                    <p className={`text-sm ${ans.correct ? 'text-green-400' : 'text-red-400'}`}>
+                      {ans.correct ? '✓ Correct' : '✗ Incorrect'}
+                    </p>
+                    {!ans.correct && (
+                      <p className="text-sm text-gray-400 mt-2">
+                        {lesson.quiz[i].explanation}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              {/* Complete Lesson Button */}
+              {!lessonCompleted && (
+                <button
+                  onClick={handleCompleteLesson}
+                  className="w-full py-4 bg-gradient-primary text-white font-bold rounded-lg hover:shadow-lg hover:shadow-primary/50 transition flex items-center justify-center gap-2"
+                >
+                  <CheckCircle size={20} />
+                  Mark Lesson Complete (+100 XP)
+                </button>
+              )}
+
+              {lessonCompleted && (
+                <div className="bg-green-500/20 border border-green-500 p-4 rounded-lg flex items-center justify-center gap-2 text-green-300">
+                  <CheckCircle size={20} />
+                  <span>Lesson Completed! 🎉</span>
+                </div>
+              )}
+
+              {/* Next Lesson Button */}
+              <Link
+                href="/dashboard"
+                className="w-full py-4 glass rounded-lg font-bold hover:bg-primary/20 transition flex items-center justify-center gap-2"
+              >
+                Back to Dashboard <ArrowRight size={20} />
+              </Link>
+            </div>
+          )}
+        </div>
+      </div>
+    </main>
+  );
+}
+};
